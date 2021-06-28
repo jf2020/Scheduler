@@ -184,7 +184,7 @@ class BasePlugin:
                         else:
                             plan["isactive"] = "false"
                             
-                    timerplans = str(plans).replace("'", "\"")
+                    timerplans = str(plans).replace("'", "\"").replace("True", "true").replace("False", "false")
                             
                     Connection.Send({"Status":"200", 
                                     "Headers": {"Connection": "keep-alive", 

@@ -1,11 +1,11 @@
 """
-<plugin key="Scheduler" name="Weekly Scheduler" author="artbern" version="1.0.0" wikilink="https://github.com/ArtBern/Scheduler" externallink="https://github.com/ArtBern/Scheduler">
+<plugin key="Scheduler" name="Thermostat Scheduler" author="jf" version="1.0.0" wikilink="https://github.com/jf2020/Scheduler" externallink="https://github.com/jf2020/Scheduler">
     <description>
-        <h2>Weekly Scheduler</h2><br/>
+        <h2>Thermostat Scheduler</h2><br/>
         Thermostat with weekly scheduler.
         <h3>Features</h3>
         <ul style="list-style-type:square">
-            <li>Reach UI for OnTime timers manipulation</li>
+            <li>User inteface for easy weeklyshedule editing</li>
             <li>Switch timerplans</li>
         </ul>
         <h3>Devices</h3>
@@ -28,7 +28,6 @@
         <param field="Address" label="IP Address" width="180px" required="true" default="192.168.1.x"/>
         <param field="Port" label="Domoticz Port" width="60px" required="true" default="8080"/>
         <param field="Mode1" label="Listener Port" width="60px" required="true" default="9005"/>
-        <param field="Mode2" label="Max temperature" width="60px" required="true" default="30"/>
         <param field="Mode6" label="Debug" width="100px">
             <options>
                 <option label="True" value="Debug"/>
@@ -90,18 +89,18 @@ class BasePlugin:
         pointerselected = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/downArrow_red.png'), True)
         #json = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/thermostat_schedule.json'), False)
 
-        html = html.replace('src="/images/downArrow_white.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointer).decode("ascii") + '"')
-        html = html.replace('src="/images/downArrow_red.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointerselected).decode("ascii") + '"')
+        html = html.replace('src="../images/downArrow_white.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointer).decode("ascii") + '"')
+        html = html.replace('src="../images/downArrow_red.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointerselected).decode("ascii") + '"')
+        html = html.replace('src="../images/comfort.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointerselected).decode("ascii") + '"')
+        html = html.replace('src="../images/eco.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointerselected).decode("ascii") + '"')
+        html = html.replace('src="../images/night.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointerselected).decode("ascii") + '"')
         
 
-        html = html.replace('<script src="/javascript/thermostat_schedule.js">', '<script>' + javascript)
-        
-        html = html.replace('<script src="/tobereplaced.js">', '<script>var maxslider=' + Parameters['Mode2'] + ";")
-        
+        html = html.replace('<script src="../javascript/thermostat_schedule.js">', '<script>' + javascript)
         
         html = html.replace(' src="/', ' src="http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/')
         html = html.replace(' href="/', ' href="http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/')
-        html = html.replace('"schedule.json"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/thermostat_schedule.json"')
+        html = html.replace('"../thermostat_schedule.json"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/thermostat_schedule.json"')
         html = html.replace('"timer_plans.json"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/timer_plans.json"')
         html = html.replace('"save"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/save"')
         html = html.replace('"changetimerplan"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/changetimerplan"')

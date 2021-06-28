@@ -298,8 +298,16 @@ ScheduleSlider.prototype.getColor = function (temp) {
 
 ScheduleSlider.prototype.handleDoubleClick = function (e) {
   var mouse = this.getMouse(e);
-  this.setSelected(new ScheduleEntry(this.se.hhmmFromX(mouse.x - this.margin.left + this.imgw / 2), 'C', this));
+  var newEntry = new ScheduleEntry(this.se.hhmmFromX(mouse.x - this.margin.left + this.imgw / 2), 'C', this);
+  this.setSelected(newEntry);
   this.addScheduleEntry(this.selection);
+  if (this.entries.length == 1) {
+    // Add a second entry
+    var x = this.se.xFromHHMM('22:00');
+    if (x > newEntry.x){
+      this.addScheduleEntry(new ScheduleEntry(this.se.hhmmFromX(x), 'N', this));
+    }
+  }
 }
 
 

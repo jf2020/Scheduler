@@ -243,7 +243,7 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
         thisSS.selection.setX(thisSS.maxX);
       }
 
-      thisSS.entryTime.val(thisSS.selection.hhmm);
+      thisSS.entryTime.val(thisSS.day + " " + thisSS.selection.hhmm);
 
       // thisSS.selection.y = mouse.y - thisSS.dragoffy;  // Y axis stays fixed!  
       thisSS.valid = false; 	// Something's dragging so we must redraw
@@ -285,7 +285,7 @@ ScheduleSlider.prototype.getColor = function (temp) {
 
 ScheduleSlider.prototype.handleDoubleClick = function (e) {
   var mouse = this.getMouse(e);
-  this.setSelected(new ScheduleEntry(this.se.hhmmFromX(mouse.x - this.margin.left + this.imgw / 2), 21.0, this));
+  this.setSelected(new ScheduleEntry(this.se.hhmmFromX(mouse.x - this.margin.left + this.imgw / 2), "C", this));
   this.addScheduleEntry(this.selection);
 }
 
@@ -317,9 +317,11 @@ ScheduleSlider.prototype.draw = function () {
   // if our state is invalid, redraw and validate!
 
   if (!this.valid) {
-    if (this.selection?.temp == 'C') this.comfortBtn.addClass('active'); else this.comfortBtn.removeClass('active');
-    if (this.selection?.temp == 'E') this.ecoBtn.addClass('active'); else this.ecoBtn.removeClass('active');
-    if (this.selection?.temp == 'N') this.nightBtn.addClass('active'); else this.nightBtn.removeClass('active');
+    if (this.selection) {
+      if (this.selection.temp == 'C') this.comfortBtn.addClass('active'); else this.comfortBtn.removeClass('active');
+      if (this.selection.temp == 'E') this.ecoBtn.addClass('active'); else this.ecoBtn.removeClass('active');
+      if (this.selection.temp == 'N') this.nightBtn.addClass('active'); else this.nightBtn.removeClass('active');
+    }
     var ctx = this.ctx;
     var entries = this.entries;
     this.clear();
@@ -330,7 +332,7 @@ ScheduleSlider.prototype.draw = function () {
     var x = this.margin.left;
     var y = this.imgY + 20;
     ctx.lineWidth = 5;
-    ctx.strokeStyle = this.getColor(0);
+    ctx.strokeStyle = this.getColor('N');
     for (var i = 0; i < l; i++) {
       var entry = entries[i];
       // We can skip the drawing of elements that have moved off the screen:
@@ -412,7 +414,7 @@ ScheduleSlider.prototype.setSelected = function (sel, otherSSSelect) {
 
   if (sel) {
     this.entryDetails.show();
-    this.entryTime.val( this.day + " " + sel.hhmm);
+    this.entryTime.val(this.day + " " + sel.hhmm);
     this.entryDetails.data('selectedScheduleEntry', sel);
   } else {
     if (!otherSSSelect) {

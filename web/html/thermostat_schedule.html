@@ -39,13 +39,13 @@
 			$.ajaxSetup({ cache: false });
 
 			setPoint = function (type) {
-			var entry = $("#entryDetails").data('selectedScheduleEntry');
-					if (entry) {
-						entry.temp = type;
-						entry.ss.valid = false;
-						entry.ss.draw();
-					}
+				var entry = $("#entryDetails").data('selectedScheduleEntry');
+				if (entry) {
+					entry.temp = type;
+					entry.ss.valid = false;
+					entry.ss.draw();
 				}
+			}
 
 			reloadSchedule = function () {
 
@@ -271,7 +271,6 @@
 			background-color: #1976d2;
 			color: white;
 		}
-
 	</style>
 </head>
 
@@ -305,36 +304,32 @@
 
 		<div id="entryDetails" style="width:500px">
 			<br>
-			<b>
-				<font color="red">Change Selected Entry Temperature:</font>
-			</b>
+				Selected Entry:
+			<input type="text" id="time" name="time" readonly style="border:0; color:#ff0000; font-weight:bold;" />
+			<input type="submit" value="Delete" onclick="deleteSelected();" />
+
 			<br><br>
 			<div class="temps" align="center" style="width:500px;">
-				<button id="comfortTempBtn" class="btn-temp" onclick="setPoint('C');"><i class="icon icon-comfort" ></i> Comfort</button>
+				<button id="comfortTempBtn" class="btn-temp" onclick="setPoint('C');"><i class="icon icon-comfort"></i>
+					Comfort</button>
 
 				<input id="comfortTemp" type="number" step="0.1" min="0" max="30">
 				<span>°C</span>
 
-				<button id="ecoTempBtn" class="btn-temp" onclick="setPoint('E');"><i class="icon icon-eco" ></i> Eco</button>
+				<button id="ecoTempBtn" class="btn-temp" onclick="setPoint('E');"><i class="icon icon-eco"></i>
+					Eco</button>
 
 				<input id="ecoTemp" type="number" step="0.1" min="0" max="30">
 				<span>°C</span>
 
-				<button id="nightTempBtn" class="btn-temp" onclick="setPoint('N');"><i class="icon icon-night" ></i> Night</button>
+				<button id="nightTempBtn" class="btn-temp" onclick="setPoint('N');"><i class="icon icon-night"></i>
+					Night</button>
 
 				<input id="nightTemp" type="number" step="0.1" min="0" max="30">
 				<span>°C</span>
 
 			</div>
 			<br>
-			<div align="center">
-				Time: <input type="text" id="time" name="time" readonly
-					style="border:0; color:#ff0000; font-weight:bold;">
-			</div>
-			<br>
-			<div align="center">
-				<input type="submit" value="Delete Selected Entry" onclick="deleteSelected();" />
-			</div>
 			<br>
 		</div>
 

@@ -208,6 +208,17 @@
 			};
 
 		});
+
+		$(window).keydown(function (e) {
+			var c = e.key.toUpperCase();
+			switch (c) {
+				case 'C':
+				case 'E':
+				case 'N':
+					setPoint(c)
+					return;
+			}
+		});
 	</script>
 	<style>
 		html,

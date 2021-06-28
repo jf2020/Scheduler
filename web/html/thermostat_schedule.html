@@ -38,6 +38,15 @@
 
 			$.ajaxSetup({ cache: false });
 
+			setPoint = function (type) {
+			var entry = $("#entryDetails").data('selectedScheduleEntry');
+					if (entry) {
+						entry.temp = type;
+						entry.ss.valid = false;
+						entry.ss.draw();
+					}
+				}
+
 			reloadSchedule = function () {
 
 				$.getJSON("../timer_plans.json", function (data) {
@@ -101,25 +110,6 @@
 			$("#comfortTemp").val(19.0);
 			$("#ecoTemp").val(17.0);
 			$("#nightTemp").val(12.0);
-
-			$("#slider-horizontal").slider({
-				orientation: "horizontal",
-				range: "min",
-				min: 0,
-				max: maxslider,
-				step: 0.5,
-				value: 21.0,
-				slide: function (event, ui) {
-					$("#temp").val(ui.value.toFixed(1));
-					var entry = $("#entryDetails").data('selectedScheduleEntry');
-					if (entry) {
-						entry.temp = ui.value;
-						entry.ss.valid = false;
-						entry.ss.draw();
-					}
-				}
-			});
-			$("#temp").val($("#slider-horizontal").slider("value").toFixed(1));
 
 			saveSchedule = function () {
 				var sched_json = {};
@@ -234,8 +224,8 @@
 		}
 
 		.icon {
-			width: 24px;
-			height: 24px;
+			width: 20px;
+			height: 20px;
 			display: inline-block;
 			background-repeat: no-repeat;
 			background-size: contain
@@ -265,6 +255,21 @@
 
 		.temps span {
 			margin-right: 10px;
+		}
+
+		.btn-temp {
+			background-color: rgba(0, 0, 0, 0.12);
+			color: rgba(0, 0, 0, 0.26);
+			font-weight: bold;
+			border-radius: 5px;
+			border: none;
+			width: 90px;
+			padding: 5px;
+		}
+
+		.active {
+			background-color: #1976d2;
+			color: white;
 		}
 
 	</style>
@@ -304,13 +309,27 @@
 				<font color="red">Change Selected Entry Temperature:</font>
 			</b>
 			<br><br>
-			<div id="slider-horizontal" style="height:10px; width:500px"></div>
+			<div class="temps" align="center" style="width:500px;">
+				<button id="comfortTempBtn" class="btn-temp" onclick="setPoint('C');"><i class="icon icon-comfort" ></i> Comfort</button>
+
+				<input id="comfortTemp" type="number" step="0.1" min="0" max="30">
+				<span>°C</span>
+
+				<button id="ecoTempBtn" class="btn-temp" onclick="setPoint('E');"><i class="icon icon-eco" ></i> Eco</button>
+
+				<input id="ecoTemp" type="number" step="0.1" min="0" max="30">
+				<span>°C</span>
+
+				<button id="nightTempBtn" class="btn-temp" onclick="setPoint('N');"><i class="icon icon-night" ></i> Night</button>
+
+				<input id="nightTemp" type="number" step="0.1" min="0" max="30">
+				<span>°C</span>
+
+			</div>
 			<br>
 			<div align="center">
 				Time: <input type="text" id="time" name="time" readonly
-					style="border:0; color:#ff0000; font-weight:bold; width: 3em;" size="5">
-				Temp: <input type="text" id="temp" name="temp" readonly
-					style="border:0; color:#ff0000; font-weight:bold; width: 2.3em;" size="4">
+					style="border:0; color:#ff0000; font-weight:bold;">
 			</div>
 			<br>
 			<div align="center">
@@ -324,23 +343,7 @@
 			<input type="submit" value="Save Schedule" onclick="saveSchedule();" />
 			<input type="submit" value="Reload" onclick="reloadSchedule();" />
 		</p>
-		<div class="temps" align="center" style="width:500px;">
-			<i class="icon icon-comfort"></i>
-			<label for="comfortTemp">Comfort:</label>
-			<input id="comfortTemp" type="number" step="0.1" min="0" max="30">
-			<span>°C</span>
 
-			<i class="icon icon-eco"></i>
-			<label for="ecoTemp">Eco:</label>
-			<input id="ecoTemp" type="number" step="0.1" min="0" max="30">
-			<span>°C</span>
-
-			<i class="icon icon-night"></i>
-			<label for="nightTemp">Night:</label>
-			<input id="nightTemp" type="number" step="0.1" min="0" max="30">
-			<span>°C</span>
-
-		</div>
 
 	</div>
 </body>

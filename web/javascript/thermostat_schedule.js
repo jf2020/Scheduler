@@ -30,12 +30,10 @@ ScheduleEntry.prototype.draw = function (ctx, selected) {
     ctx.drawImage(this.ss.img, this.x, this.y);
   }
 
-  ctx.textAlign = "center";
-  //ctx.fillText(this.temp.toFixed(1), this.x + this.ss.imgw / 2, this.y - 2);
-  if (this.temp <= this.ss.nightTemp) {
+  if (this.temp == "N") {
     ctx.drawImage(this.ss.iconNight, this.x + this.ss.imgw / 2 - 8, this.y - 14, 16, 16);
   }
-  else if (this.temp <= this.ss.ecoTemp) {
+  else if (this.temp == "E") {
     ctx.drawImage(this.ss.iconEco, this.x + this.ss.imgw / 2 - 8, this.y - 14, 16, 16);
   }
   else {
@@ -135,9 +133,10 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
   this.se = new ScheduleEntry("00:00", 0.0, this);
 
   this.entryDetails = $("#entryDetails");
-  this.entrySlider = $("#slider-horizontal");
+  this.comfortBtn = $("#comfortTempBtn");
+  this.ecoBtn = $("#ecoTempBtn");
+  this.nightBtn = $("#nightTempBtn");
   this.entryTime = $("#time");
-  this.entryTemp = $("#temp");
 
   this.touchTimer = null;
 
@@ -279,8 +278,8 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
 // Get color based on set temp
 
 ScheduleSlider.prototype.getColor = function (temp) {
-  if (temp <= this.nightTemp) return '#6a90df';
-  if (temp <= this.ecoTemp) return '#91bfd9';
+  if (temp == "N") return '#465CEA'; //#6a90df
+  if (temp == "E") return '#91bfd9';
   return '#d27f41';
 }
 
@@ -318,6 +317,9 @@ ScheduleSlider.prototype.draw = function () {
   // if our state is invalid, redraw and validate!
 
   if (!this.valid) {
+    if (this.selection?.temp == 'C') this.comfortBtn.addClass('active'); else this.comfortBtn.removeClass('active');
+    if (this.selection?.temp == 'E') this.ecoBtn.addClass('active'); else this.ecoBtn.removeClass('active');
+    if (this.selection?.temp == 'N') this.nightBtn.addClass('active'); else this.nightBtn.removeClass('active');
     var ctx = this.ctx;
     var entries = this.entries;
     this.clear();
@@ -410,9 +412,7 @@ ScheduleSlider.prototype.setSelected = function (sel, otherSSSelect) {
 
   if (sel) {
     this.entryDetails.show();
-    this.entryTime.val(sel.hhmm);
-    this.entrySlider.slider("option", "value", sel.temp);
-    this.entryTemp.val(sel.temp.toFixed(1));
+    this.entryTime.val( this.day + " " + sel.hhmm);
     this.entryDetails.data('selectedScheduleEntry', sel);
   } else {
     if (!otherSSSelect) {

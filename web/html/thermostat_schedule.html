@@ -1,271 +1,348 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta id="viewport" name="viewport" content="width=500, initial-scale=0.75, minimum-scale=0.75, maximum-scale=0.75, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Thermostat Web Interface - Schedule</title>
-  <link href="/images/Apple_ThermostatIcon_120x120.png" rel="apple-touch-icon" sizes="120x120" />
-  <link href="/images/Apple_ThermostatIcon_152x152.png" rel="apple-touch-icon" sizes="152x152" />
-  <link href="/images/Apple_ThermostatIcon_180x180.png" rel="apple-touch-icon" sizes="180x180" />
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta id="viewport" name="viewport"
+		content="width=500, initial-scale=0.75, minimum-scale=0.75, maximum-scale=0.75, user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<title>Thermostat Web Interface - Schedule</title>
 
-  <script src="/javascript/thermostat_schedule.js"></script>
-  
-  <script src="/tobereplaced.js"></script>
-  
- <script>
+	<link rel="stylesheet" href="../css/jquery-ui.min.css">
 
-  $(function() {
-	// turn this on for debugging on IOS devices
+	<script src="../javascript/jquery-1.11.3.min.js"></script>
+	<script src="../javascript/jquery-ui.min.js"></script>
+	<script src="../javascript/thermostat_schedule.js"></script>
 
-	/* window.onerror = function( error ) {
-		alert( error );
-	}; */
+	<script>
+		var maxslider = 30;
+	</script>
 
-	if( navigator.platform.indexOf("iPad") != -1 ) {
-		$('meta[ name=viewport ]').attr( 'content', 'user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0' );
-	}
+	<script>
 
-	var days = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ];
-	var scheduleSliders = [];
+		$(function () {
+			// turn this on for debugging on IOS devices
 
-	$.ajaxSetup( { cache: false } );
-	
-	reloadSchedule = function() {
+			/* window.onerror = function( error ) {
+				alert( error );
+			}; */
 
-		$.getJSON( "timer_plans.json", function( data ) {
-			
-			
-			$('#schedule-select').empty();
-			$('#schedule-select').off('change','**');
-			
-			for( i = 0; i < data.length; i ++) {
-			  $('#schedule-select').append( $('<option>', {
-				value: data[i].idx,
-				text: data[i].Name
-			  }));
-			  
-			  if (data[i].isactive == "true")
-			  {
-				$('#schedule-select').val(data[i].idx);
-			  }
+			if (navigator.platform.indexOf("iPad") != -1) {
+				$('meta[ name=viewport ]').attr('content', 'user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0');
 			}
-			
-			$('#schedule-select').on( 'change', function() {
- 
-				//debugger;
-				changeTimerPlan($('#schedule-select').find( ":selected" ).val())
 
-				reloadSchedule();
+			var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+			var scheduleSliders = [];
+
+			$.ajaxSetup({ cache: false });
+
+			reloadSchedule = function () {
+
+				$.getJSON("../timer_plans.json", function (data) {
+
+
+					$('#schedule-select').empty();
+					$('#schedule-select').off('change', '**');
+
+					for (i = 0; i < data.length; i++) {
+						$('#schedule-select').append($('<option>', {
+							value: data[i].idx,
+							text: data[i].Name
+						}));
+
+						if (data[i].isactive == "true") {
+							$('#schedule-select').val(data[i].idx);
+						}
+					}
+
+					$('#schedule-select').on('change', function () {
+
+						//debugger;
+						changeTimerPlan($('#schedule-select').find(":selected").val())
+
+						reloadSchedule();
+					});
+
+				});
+
+				$.getJSON("../thermostat_schedule.json", function (data) {
+
+					$("#canvas").empty();
+
+					for (i = 0; i < days.length; i++) {
+						var day = days[i].toLowerCase();
+						var canvas = $('<canvas>').attr({
+							id: "canvas-" + day,
+							width: 500,
+							height: 78
+						}).appendTo("#canvas")[0];
+
+						$('<br>').appendTo("#canvas");
+
+						var ss = new ScheduleSlider(days[i], canvas, "pointer", "pointer-selected", scheduleSliders);
+
+						scheduleSliders.push(ss);
+
+						var entries = data[day]
+
+						for (j = 0; j < entries.length; j++) {
+							var entry = entries[j];
+							ss.addScheduleEntry(new ScheduleEntry(entry[0], entry[1], ss));
+						}
+					}
+
+				});
+			}
+
+			reloadSchedule();
+
+			$("#comfortTemp").val(19.0);
+			$("#ecoTemp").val(17.0);
+			$("#nightTemp").val(12.0);
+
+			$("#slider-horizontal").slider({
+				orientation: "horizontal",
+				range: "min",
+				min: 0,
+				max: maxslider,
+				step: 0.5,
+				value: 21.0,
+				slide: function (event, ui) {
+					$("#temp").val(ui.value.toFixed(1));
+					var entry = $("#entryDetails").data('selectedScheduleEntry');
+					if (entry) {
+						entry.temp = ui.value;
+						entry.ss.valid = false;
+						entry.ss.draw();
+					}
+				}
 			});
+			$("#temp").val($("#slider-horizontal").slider("value").toFixed(1));
 
-		});
-		
-		$.getJSON( "schedule.json", function( data ) {
-			
-			$("#canvas").empty();
-			
-			for( i = 0; i < days.length; i++ ) {
-				var day = days[ i ].toLowerCase();
-				var canvas = $('<canvas>').attr({
-								id: "canvas-" + day,
-								width: 500,
-								height: 78
-							 }).appendTo( "#canvas")[ 0 ];
+			saveSchedule = function () {
+				var sched_json = {};
 
-				$('<br>').appendTo( "#canvas" );
-
-				var ss = new ScheduleSlider( days[ i ], canvas, "pointer", "pointer-selected", scheduleSliders );
-
-				scheduleSliders.push( ss );
-
-				var entries = data[ day ]
-
-				for( j = 0; j < entries.length; j++ ) {
-					var entry = entries[ j ];
-					ss.addScheduleEntry( new ScheduleEntry( entry[ 0 ], entry[ 1 ], ss ) ); 
-				}
-			}
-
-		});
-	}
-
-	reloadSchedule();
-
-	$( "#slider-horizontal" ).slider({
-	  orientation: "horizontal",
-	  range: "min",
-	  min: 0,
-	  max: maxslider,
-	  step: 0.5,
-	  value: 21.0,
-	  slide: function( event, ui ) {
-		$( "#temp" ).val( ui.value.toFixed( 1 ) );
-		var entry = $( "#entryDetails" ).data( 'selectedScheduleEntry' );
-		if( entry ) {
-			entry.temp = ui.value;
-			entry.ss.valid = false;
-			entry.ss.draw();
-		}
-	  }
-	});
-	$( "#temp" ).val( $( "#slider-horizontal" ).slider( "value" ).toFixed( 1 ) );
-
-	saveSchedule = function() {
-		var sched_json = {};
-
-		for( s = 0; s < scheduleSliders.length; s++ ) {
-		  ss = scheduleSliders[ s ];
-		  sched_json[ ss.day.toLowerCase() ] = [];
-		  for( i = 0; i < ss.entries.length; i++ ) {
-		  	sched_json[ ss.day.toLowerCase() ].push( [ ss.entries[ i ].hhmm, ss.entries[ i ].temp ] );
-		  }
-	    }
-		 
-		ShowNotify($.t('Saving schedule') + ' ');
-
-		$.ajax({
-				url: "save",
-				data: JSON.stringify( sched_json, null, 4  ),
-				contentType: 'application/json',
-				async: false,
-				type : 'POST', 		
-				success: function (data) {
-					if (data.status == "ERROR") {
-						HideNotify();
-						bootbox.alert($.t(data.message));
+				for (s = 0; s < scheduleSliders.length; s++) {
+					ss = scheduleSliders[s];
+					sched_json[ss.day.toLowerCase()] = [];
+					for (i = 0; i < ss.entries.length; i++) {
+						sched_json[ss.day.toLowerCase()].push([ss.entries[i].hhmm, ss.entries[i].temp]);
 					}
-					//wait 1 second
-					setTimeout(function () {
-						HideNotify();
-					}, 1000);
-				},
-				error: function (jqxhr, status, error) {
-					HideNotify();
-					bootbox.alert($.t('Problem saving schedule.' + status + '. ' + error));
 				}
-		});
 
+				ShowNotify($.t('Saving schedule') + ' ');
 
-	};
-
-	changeTimerPlan = function(idx) {
-		
-		ShowNotify($.t('Changing Timer Plan') + ' ');
-		
-		active_timer = {};
-		active_timer["activetimerplan"] = idx;
-
-		$.ajax({
-				url: "changetimerplan",
-				data: JSON.stringify( active_timer, null, 4  ),
-				contentType: 'application/json',
-				async: false,
-				type : 'POST', 		
-				success: function (data) {
-					if (data.status == "ERROR") {
+				$.ajax({
+					url: "save",
+					data: JSON.stringify(sched_json, null, 4),
+					contentType: 'application/json',
+					async: false,
+					type: 'POST',
+					success: function (data) {
+						if (data.status == "ERROR") {
+							HideNotify();
+							bootbox.alert($.t(data.message));
+						}
+						//wait 1 second
+						setTimeout(function () {
+							HideNotify();
+						}, 1000);
+					},
+					error: function (jqxhr, status, error) {
 						HideNotify();
-						bootbox.alert($.t(data.message));
+						bootbox.alert($.t('Problem saving schedule.' + status + '. ' + error));
 					}
-					//wait 1 second
-					setTimeout(function () {
+				});
+
+
+			};
+
+			changeTimerPlan = function (idx) {
+
+				ShowNotify($.t('Changing Timer Plan') + ' ');
+
+				active_timer = {};
+				active_timer["activetimerplan"] = idx;
+
+				$.ajax({
+					url: "changetimerplan",
+					data: JSON.stringify(active_timer, null, 4),
+					contentType: 'application/json',
+					async: false,
+					type: 'POST',
+					success: function (data) {
+						if (data.status == "ERROR") {
+							HideNotify();
+							bootbox.alert($.t(data.message));
+						}
+						//wait 1 second
+						setTimeout(function () {
+							HideNotify();
+						}, 1000);
+					},
+					error: function (jqxhr, status, error) {
 						HideNotify();
-					}, 1000);
-				},
-				error: function (jqxhr, status, error) {
-					HideNotify();
-					bootbox.alert($.t('Problem changing Timer Plan.' + status + '. ' + error));
+						bootbox.alert($.t('Problem changing Timer Plan.' + status + '. ' + error));
+					}
+				});
+
+
+			};
+
+			deleteSelected = function () {
+				var entry = $("#entryDetails").data('selectedScheduleEntry');
+				if (entry) {
+					entry.ss.deleteSelected();
+					entry.ss.valid = false;
+					entry.ss.draw();
 				}
+			};
+
 		});
-
-
-	};
-
-	deleteSelected = function() {
-		var entry = $( "#entryDetails" ).data( 'selectedScheduleEntry' );
-		if( entry ) {
-			entry.ss.deleteSelected();
-			entry.ss.valid = false;
-			entry.ss.draw();
+	</script>
+	<style>
+		html,
+		body {
+			margin: 0;
+			height: 100%;
+			width: 100%;
+			min-height: 100%;
+			min-width: 100%;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 		}
-	};
 
-  });
-  </script>
-  <style>
-	html, body {
-	  margin: 0;
-	  height: 100%;
-	  width: 100%;
-	  min-height: 100%;
-	  min-width: 100%;
-	}
+		.pointer {
+			display: none;
+		}
 
-	.pointer {
-		display: none;
-	}
+		#entryDetails {
+			display: none;
+		}
 
-	#entryDetails {
-		display: none;
-	}
+		canvas {
+			border: 1px solid #DDDDDD;
+		}
 
-	canvas {
-		border: 1px solid #DDDDDD;
-	}
+		#cool {
+			display: none;
+		}
 
-	#cool {
-		display: none;
-	}
+		input[type="number"] {
+			width: 45px;
+		}
 
+		.icon {
+			width: 24px;
+			height: 24px;
+			display: inline-block;
+			background-repeat: no-repeat;
+			background-size: contain
+		}
 
-  </style>
+		.icon-comfort {
+			background-image: url("../images/comfort.png");
+		}
+
+		.icon-eco {
+			background-image: url("../images/eco.png");
+		}
+
+		.icon-night {
+			background-image: url("../images/night.png");
+		}
+
+		.temps {
+			display: inline-flex;
+			align-items: center;
+		}
+
+		.temps label {
+			margin-right: 5px;
+			margin-left: 5px;
+		}
+
+		.temps span {
+			margin-right: 10px;
+		}
+
+	</style>
 </head>
+
 <body>
 	<div align="center">
-		<img id="pointer" class="pointer" src="/images/downArrow_white.png">
-		<img id="pointer-selected" class="pointer" src="/images/downArrow_red.png">
+		<img id="pointer" class="pointer" src="../images/downArrow_white.png">
+		<img id="pointer-selected" class="pointer" src="../images/downArrow_red.png">
+		<img id="icon-comfort" class="pointer" src="../images/comfort.png">
+		<img id="icon-eco" class="pointer" src="../images/eco.png">
+		<img id="icon-night" class="pointer" src="../images/night.png">
 
 		<table width="500px">
-				<tr>
-					<td width="20%" align="center"><img src="/images/logo.png" width="40px" height="40px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-					<td width="55%"align="center"><b>Thermostat Schedule</b></td>
-					<td width="25%" align="right"><select id="schedule-select"></select></td>
-				</tr>
+			<tr>
+				<td width="20%" align="center"><img src="../images/logo.png" width="40px"
+						height="40px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				<td width="55%" align="center"><b>Thermostat Schedule</b></td>
+				<td width="25%" align="right"><select id="schedule-select"></select></td>
+			</tr>
 		</table>
-	   
 
-	   <table id="itemtablenostatus" style="display: inline;">
-	   	<tbody style="display: table-row-group;">
-	   		<tr>
-	   			<td style="display: inline-table;">
-	   				<div id="canvas"></div>
-	   			</td>
-	   		</tr>
-	   	</tbody>
-	   </table>
 
-	   <div id="entryDetails" style="width:500px">
-		   <br>
-		   <b><font color="red">Change Selected Entry Temperature:</font></b>
-		   <br><br>
-		   <div id="slider-horizontal" style="height:10px; width:500px"></div>
-		   <br>
-		   <div align="center">
-				Time: <input type="text" id="time" name="time" readonly style="border:0; color:#ff0000; font-weight:bold; width: 3em;" size="5">
-				Temp: <input type="text" id="temp" name="temp" readonly style="border:0; color:#ff0000; font-weight:bold; width: 2.3em;" size="4">
-		   </div>
-		   <br>	
-		   <div align="center">
-		   		<input type="submit" value="Delete Selected Entry" onclick="deleteSelected();" />
-		   </div>
-		   <br>	
-	   </div>
+		<table id="itemtablenostatus" style="display: inline;">
+			<tbody style="display: table-row-group;">
+				<tr>
+					<td style="display: inline-table;">
+						<div id="canvas"></div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 
-		<p align="center"  style="width:500px;">
-		   <input type="submit" value="Cancel" onclick="window.location = '/';" />
-		   <input type="submit" value="Save Schedule" onclick="saveSchedule();" />
-	   </p>
+		<div id="entryDetails" style="width:500px">
+			<br>
+			<b>
+				<font color="red">Change Selected Entry Temperature:</font>
+			</b>
+			<br><br>
+			<div id="slider-horizontal" style="height:10px; width:500px"></div>
+			<br>
+			<div align="center">
+				Time: <input type="text" id="time" name="time" readonly
+					style="border:0; color:#ff0000; font-weight:bold; width: 3em;" size="5">
+				Temp: <input type="text" id="temp" name="temp" readonly
+					style="border:0; color:#ff0000; font-weight:bold; width: 2.3em;" size="4">
+			</div>
+			<br>
+			<div align="center">
+				<input type="submit" value="Delete Selected Entry" onclick="deleteSelected();" />
+			</div>
+			<br>
+		</div>
+
+		<p align="center" style="width:500px;">
+			<input type="submit" value="Cancel" onclick="window.location = '/';" />
+			<input type="submit" value="Save Schedule" onclick="saveSchedule();" />
+			<input type="submit" value="Reload" onclick="reloadSchedule();" />
+		</p>
+		<div class="temps" align="center" style="width:500px;">
+			<i class="icon icon-comfort"></i>
+			<label for="comfortTemp">Comfort:</label>
+			<input id="comfortTemp" type="number" step="0.1" min="0" max="30">
+			<span>°C</span>
+
+			<i class="icon icon-eco"></i>
+			<label for="ecoTemp">Eco:</label>
+			<input id="ecoTemp" type="number" step="0.1" min="0" max="30">
+			<span>°C</span>
+
+			<i class="icon icon-night"></i>
+			<label for="nightTemp">Night:</label>
+			<input id="nightTemp" type="number" step="0.1" min="0" max="30">
+			<span>°C</span>
+
+		</div>
+
 	</div>
 </body>
+
 </html>

@@ -129,6 +129,7 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
   this.imgY = 33;
 
   this.increment = 10; 	// minutes
+  this.step = Math.floor(this.lenX / 24 / 6);
 
   this.se = new ScheduleEntry("00:00", 0.0, this);
 
@@ -199,8 +200,19 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
         // Keep track of where in the object we clicked
         // so we can move it smoothly ( see mousemove )
         thisSS.dragoffx = mx - mySel.x;
-        // thisSS.dragoffy = my - mySel.y;
         thisSS.dragging = true;
+        if (i == 0) {
+          mySel.minX = thisSS.minX;
+        }
+        else{
+          mySel.minX = entries[i - 1].x;
+        }
+        if (i == entries.length - 1) {
+          mySel.maxX = thisSS.maxX + 2;
+        }
+        else{
+          mySel.maxX = entries[i + 1].x;
+        }
         thisSS.setSelected(mySel);
         thisSS.valid = false;
         if (thisSS.touchTimer != null) {
@@ -235,17 +247,18 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
       var mouse = thisSS.getMouse(e);
       // We don't want to drag the object by its top-left corner, we want to drag it
       // from where we clicked. Thats why we saved the offset and use it here
-      thisSS.selection.setX(mouse.x - thisSS.dragoffx);
+      var nx = mouse.x - thisSS.dragoffx;
+      //nx = nx - nx % thisSS.step;
+      thisSS.selection.setX(nx);
 
-      if (thisSS.selection.x < thisSS.minX) {
-        thisSS.selection.setX(thisSS.minX);
-      } else if (thisSS.selection.x > thisSS.maxX) {
-        thisSS.selection.setX(thisSS.maxX);
+      if (thisSS.selection.x < thisSS.selection.minX) {
+        thisSS.selection.setX(thisSS.selection.minX);
+      } else if (thisSS.selection.x > thisSS.selection.maxX) {
+        thisSS.selection.setX(thisSS.selection.maxX);
       }
 
       thisSS.entryTime.val(thisSS.day + " " + thisSS.selection.hhmm);
 
-      // thisSS.selection.y = mouse.y - thisSS.dragoffy;  // Y axis stays fixed!  
       thisSS.valid = false; 	// Something's dragging so we must redraw
     }
 
@@ -285,7 +298,7 @@ ScheduleSlider.prototype.getColor = function (temp) {
 
 ScheduleSlider.prototype.handleDoubleClick = function (e) {
   var mouse = this.getMouse(e);
-  this.setSelected(new ScheduleEntry(this.se.hhmmFromX(mouse.x - this.margin.left + this.imgw / 2), "C", this));
+  this.setSelected(new ScheduleEntry(this.se.hhmmFromX(mouse.x - this.margin.left + this.imgw / 2), 'C', this));
   this.addScheduleEntry(this.selection);
 }
 

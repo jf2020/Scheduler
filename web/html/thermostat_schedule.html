@@ -84,7 +84,7 @@
 						var day = days[i].toLowerCase();
 						var canvas = $('<canvas>').attr({
 							id: "canvas-" + day,
-							width: 500,
+							width: 1200,
 							height: 78
 						}).appendTo("#canvas")[0];
 
@@ -117,12 +117,28 @@
 				for (s = 0; s < scheduleSliders.length; s++) {
 					ss = scheduleSliders[s];
 					sched_json[ss.day.toLowerCase()] = [];
+					var state = 'N';
+					var time = 0;
 					for (i = 0; i < ss.entries.length; i++) {
-						sched_json[ss.day.toLowerCase()].push([ss.entries[i].hhmm, ss.entries[i].temp]);
+						// Remove superfluous entries
+						if (ss.entries[i].temp != state && ss.entries[i].hhmm != time) {
+							sched_json[ss.day.toLowerCase()].push([ss.entries[i].hhmm, ss.entries[i].temp]);
+						}
+						state = ss.entries[i].temp;
+						time = ss.entries[i].hhmm;
 					}
 				}
 
-				ShowNotify($.t('Saving schedule') + ' ');
+				//ShowNotify($.t('Saving schedule') + ' ');
+
+				const a = document.createElement("a");
+				a.href = URL.createObjectURL(new Blob([JSON.stringify(sched_json, null, 2)], {
+					type: "text/plain"
+				}));
+				a.setAttribute("download", "thermostat_schedule.json");
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
 
 				$.ajax({
 					url: "save",
@@ -139,10 +155,11 @@
 						setTimeout(function () {
 							HideNotify();
 						}, 1000);
+						reloadSchedule();
 					},
 					error: function (jqxhr, status, error) {
-						HideNotify();
-						bootbox.alert($.t('Problem saving schedule.' + status + '. ' + error));
+						//HideNotify();
+						//bootbox.alert($.t('Problem saving schedule.' + status + '. ' + error));
 					}
 				});
 
@@ -304,7 +321,7 @@
 
 		<div id="entryDetails" style="width:500px">
 			<br>
-				Selected Entry:
+			Selected Entry:
 			<input type="text" id="time" name="time" readonly style="border:0; color:#ff0000; font-weight:bold;" />
 			<input type="submit" value="Delete" onclick="deleteSelected();" />
 

@@ -80,6 +80,18 @@
 
 					$("#canvas").empty();
 
+					var temps = data['temps'];
+					if (temps) {
+						$("#comfortTemp").val(temps.C);
+						$("#ecoTemp").val(temps.E);
+						$("#nightTemp").val(temps.N);
+					}
+					else {
+						$("#comfortTemp").val(19.0);
+						$("#ecoTemp").val(17.0);
+						$("#nightTemp").val(12.0);
+					}
+
 					for (i = 0; i < days.length; i++) {
 						var day = days[i].toLowerCase();
 						var canvas = $('<canvas>').attr({
@@ -98,7 +110,10 @@
 
 						for (j = 0; j < entries.length; j++) {
 							var entry = entries[j];
-							ss.addScheduleEntry(new ScheduleEntry(entry[0], entry[1], ss));
+							var c = 'C';
+							if (entry[1] == 17) c = 'E';
+							if (entry[1] == 12) c = 'N';
+							ss.addScheduleEntry(new ScheduleEntry(entry[0], c, ss));
 						}
 					}
 
@@ -107,12 +122,13 @@
 
 			reloadSchedule();
 
-			$("#comfortTemp").val(19.0);
-			$("#ecoTemp").val(17.0);
-			$("#nightTemp").val(12.0);
-
 			saveSchedule = function () {
 				var sched_json = {};
+				var comfortTemp = $("#comfortTemp").val() * 1;
+				var ecoTemp = $("#ecoTemp").val() * 1;
+				var nightTemp = $("#nightTemp").val() * 1;
+
+				sched_json['temps'] = { C: comfortTemp, E: ecoTemp, N: nightTemp};
 
 				for (s = 0; s < scheduleSliders.length; s++) {
 					ss = scheduleSliders[s];
@@ -122,23 +138,17 @@
 					for (i = 0; i < ss.entries.length; i++) {
 						// Remove superfluous entries
 						if (ss.entries[i].temp != state && ss.entries[i].hhmm != time) {
-							sched_json[ss.day.toLowerCase()].push([ss.entries[i].hhmm, ss.entries[i].temp]);
+							var t = comfortTemp;
+							if (ss.entries[i].temp == 'E') t = ecoTemp;
+							if (ss.entries[i].temp == 'N') t = nightTemp;
+							sched_json[ss.day.toLowerCase()].push([ss.entries[i].hhmm, t]);
 						}
 						state = ss.entries[i].temp;
 						time = ss.entries[i].hhmm;
 					}
 				}
 
-				//ShowNotify($.t('Saving schedule') + ' ');
-
-				const a = document.createElement("a");
-				a.href = URL.createObjectURL(new Blob([JSON.stringify(sched_json, null, 2)], {
-					type: "text/plain"
-				}));
-				a.setAttribute("download", "thermostat_schedule.json");
-				document.body.appendChild(a);
-				a.click();
-				document.body.removeChild(a);
+				ShowNotify($.t('Saving schedule') + ' ');
 
 				$.ajax({
 					url: "save",
@@ -154,12 +164,12 @@
 						//wait 1 second
 						setTimeout(function () {
 							HideNotify();
+							reloadSchedule();
 						}, 1000);
-						reloadSchedule();
 					},
 					error: function (jqxhr, status, error) {
-						//HideNotify();
-						//bootbox.alert($.t('Problem saving schedule.' + status + '. ' + error));
+						HideNotify();
+						bootbox.alert($.t('Problem saving schedule.' + status + '. ' + error));
 					}
 				});
 
@@ -251,7 +261,7 @@
 			width: 45px;
 		}
 
-		.icon {
+		.btnico {
 			width: 20px;
 			height: 20px;
 			display: inline-block;
@@ -259,15 +269,15 @@
 			background-size: contain
 		}
 
-		.icon-comfort {
+		.i-comfort {
 			background-image: url("../images/comfort.png");
 		}
 
-		.icon-eco {
+		.i-eco {
 			background-image: url("../images/eco.png");
 		}
 
-		.icon-night {
+		.i-night {
 			background-image: url("../images/night.png");
 		}
 
@@ -286,8 +296,8 @@
 		}
 
 		.btn-temp {
-			background-color: rgba(0, 0, 0, 0.12);
-			color: rgba(0, 0, 0, 0.26);
+			background-color: lightgray;
+			color: grey;
 			font-weight: bold;
 			border-radius: 5px;
 			border: none;
@@ -338,19 +348,19 @@
 
 			<br><br>
 			<div class="temps" align="center" style="width:500px;">
-				<button id="comfortTempBtn" class="btn-temp" onclick="setPoint('C');"><i class="icon icon-comfort"></i>
+				<button id="comfortTempBtn" class="btn-temp" onclick="setPoint('C');"><i class="btnico i-comfort"></i>
 					Comfort</button>
 
 				<input id="comfortTemp" type="number" step="0.1" min="0" max="30">
 				<span>°C</span>
 
-				<button id="ecoTempBtn" class="btn-temp" onclick="setPoint('E');"><i class="icon icon-eco"></i>
+				<button id="ecoTempBtn" class="btn-temp" onclick="setPoint('E');"><i class="btnico i-eco"></i>
 					Eco</button>
 
 				<input id="ecoTemp" type="number" step="0.1" min="0" max="30">
 				<span>°C</span>
 
-				<button id="nightTempBtn" class="btn-temp" onclick="setPoint('N');"><i class="icon icon-night"></i>
+				<button id="nightTempBtn" class="btn-temp" onclick="setPoint('N');"><i class="btnico i-night"></i>
 					Night</button>
 
 				<input id="nightTemp" type="number" step="0.1" min="0" max="30">

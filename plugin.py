@@ -28,11 +28,16 @@
         <param field="Address" label="IP Address" width="180px" required="true" default="192.168.1.x"/>
         <param field="Port" label="Domoticz Port" width="60px" required="true" default="8080"/>
         <param field="Mode1" label="Listener Port" width="60px" required="true" default="9005"/>
-        <param field="Mode6" label="Debug" width="100px">
+        <param field="Mode6" label="Logging Level" width="200px">
             <options>
-                <option label="True" value="Debug"/>
-                <option label="False" value="Normal"  default="true" />
-                <option label="Logging" value="File"/>
+                <option label="Normal" value="Normal"  default="true"/>
+                <option label="Verbose" value="Verbose"/>
+                <option label="Debug - Python Only" value="2"/>
+                <option label="Debug - Basic" value="62"/>
+                <option label="Debug - Basic+Messages" value="126"/>
+                <option label="Debug - Connections Only" value="16"/>
+                <option label="Debug - Connections+Queue" value="144"/>
+                <option label="Debug - All" value="-1"/>
             </options>
         </param>
     </params>
@@ -43,6 +48,7 @@ import urllib.parse
 import os
 import json
 import base64
+from urllib import parse, request
 from utils import Utils
 
 # sudo pip3 install git+git://github.com/ArtBern/Domoticz-API.git -t /usr/lib/python3.5 --upgrade
@@ -71,13 +77,49 @@ class BasePlugin:
     
     def __init__(self):
         self.__filename = ""
+        self.debug = False
+        self.loglevel = None
+        self.statussupported = True
+
+        self.InternalsDefaults = {
+            'ComfortTemp': float(19), # temperature comfort
+            'EcoTemp': float(17), # temperature eco
+            'NightTemp': float(12), # temperature nuit
+            'ConstC': float(60),  # inside heating coeff, depends on room size & power of your heater (60 by default)
+            'ConstT': float(1),  # external heating coeff,depends on the insulation relative to the outside (1 by default)
+            'nbCC': 0,  # number of learnings for ConstC
+            'nbCT': 0,  # number of learnings for ConstT
+            'LastPwr': 0,  # % power from last calculation
+            'LastInT': float(0),  # inside temperature at last calculation
+            'LastOutT': float(0),  # outside temprature at last calculation
+            'LastSetPoint': float(20),  # setpoint at time of last calculation
+            'ALStatus': 0}  # AutoLearning status (0 = uninitialized, 1 = initialized, 2 = disabled)
+        self.Internals = self.InternalsDefaults.copy()
         return
 
     def onStart(self):
         Domoticz.Log("onStart called")
-        if Parameters["Mode6"] != "Normal":
-            Domoticz.Debugging(1)
+        # setup the appropriate logging level
+        try:
+            debuglevel = int(Parameters["Mode6"])
+        except ValueError:
+            debuglevel = 0
+            self.loglevel = Parameters["Mode6"]
+        if debuglevel != 0:
+            self.debug = True
+            Domoticz.Debugging(debuglevel)
+            DumpConfigToLog()
+            self.loglevel = "Verbose"
+        else:
+            self.debug = False
+            Domoticz.Debugging(0)
         DumpConfigToLog()
+
+        # loads persistent variables from dedicated user variable
+        # note: to reset the thermostat to default values (i.e. ignore all past learning),
+        # just delete the relevant "<plugin name>-InternalVariables" user variable Domoticz GUI and restart plugin
+        self.getUserVar()
+
         self.httpServerConn = Domoticz.Connection(Name="Server Connection", Transport="TCP/IP", Protocol="HTTP", Port=Parameters["Mode1"])
         self.httpServerConn.Listen()
 		
@@ -87,13 +129,17 @@ class BasePlugin:
         javascript = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/javascript/thermostat_schedule.js'), False)
         pointer = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/downArrow_white.png'), True)
         pointerselected = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/downArrow_red.png'), True)
+        comfortIco = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/comfort.png'), True)
+        ecoIco = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/eco.png'), True)
+        nightIco = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/night.png'), True)
+
         #json = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/thermostat_schedule.json'), False)
 
         html = html.replace('src="../images/downArrow_white.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointer).decode("ascii") + '"')
         html = html.replace('src="../images/downArrow_red.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointerselected).decode("ascii") + '"')
-        html = html.replace('src="../images/comfort.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointerselected).decode("ascii") + '"')
-        html = html.replace('src="../images/eco.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointerselected).decode("ascii") + '"')
-        html = html.replace('src="../images/night.png"', 'src="data:image/png;base64, ' + base64.b64encode(pointerselected).decode("ascii") + '"')
+        html = html.replace('"../images/comfort.png"', '"data:image/png;base64, ' + base64.b64encode(comfortIco).decode("ascii") + '"')
+        html = html.replace('"../images/eco.png"', '"data:image/png;base64, ' + base64.b64encode(ecoIco).decode("ascii") + '"')
+        html = html.replace('"../images/night.png"', '"data:image/png;base64, ' + base64.b64encode(nightIco).decode("ascii") + '"')
         
 
         html = html.replace('<script src="../javascript/thermostat_schedule.js">', '<script>' + javascript)
@@ -101,7 +147,7 @@ class BasePlugin:
         html = html.replace(' src="/', ' src="http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/')
         html = html.replace(' href="/', ' href="http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/')
         html = html.replace('"../thermostat_schedule.json"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/thermostat_schedule.json"')
-        html = html.replace('"timer_plans.json"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/timer_plans.json"')
+        html = html.replace('"../timer_plans.json"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/timer_plans.json"')
         html = html.replace('"save"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/save"')
         html = html.replace('"changetimerplan"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/changetimerplan"')
         
@@ -120,6 +166,7 @@ class BasePlugin:
     def onStop(self):
         LogMessage("onStop called")
         Utils.deleteFile(self.__filename)
+        Domoticz.Debugging(0)
         LogMessage("Leaving onStop")
 
 
@@ -308,6 +355,55 @@ class BasePlugin:
         
 #    def onDeviceModified(self, Unit):
 #        Domoticz.Log("onCommand called for Unit " + str(Unit))
+
+    def getUserVar(self):
+        variables = DomoticzAPICall("type=command&param=getuservariables")
+        if variables:
+            # there is a valid response from the API but we do not know if our variable exists yet
+            novar = True
+            varname = Parameters["Name"] + "-InternalVariables"
+            valuestring = ""
+            if "result" in variables:
+                for variable in variables["result"]:
+                    if variable["Name"] == varname:
+                        valuestring = variable["Value"]
+                        novar = False
+                        break
+            if novar:
+                # create user variable since it does not exist
+                self.WriteLog("User Variable {} does not exist. Creation requested".format(varname), "Verbose")
+
+                parameter = "adduservariable"
+                
+                # actually calling Domoticz API
+                DomoticzAPICall("type=command&param={}&vname={}&vtype=2&vvalue={}".format(
+                    parameter, varname, str(self.InternalsDefaults)))
+                
+                self.Internals = self.InternalsDefaults.copy()  # we re-initialize the internal variables
+            else:
+                try:
+                    self.Internals.update(eval(valuestring))
+                except:
+                    self.Internals = self.InternalsDefaults.copy()
+                return
+        else:
+            Domoticz.Error("Cannot read the uservariable holding the persistent variables")
+            self.Internals = self.InternalsDefaults.copy()
+
+
+    def saveUserVar(self):
+        varname = Parameters["Name"] + "-InternalVariables"
+        DomoticzAPICall("type=command&param=updateuservariable&vname={}&vtype=2&vvalue={}".format(
+            varname, str(self.Internals)))
+
+    def WriteLog(self, message, level="Normal"):
+        if (self.loglevel == "Verbose" and level == "Verbose") or level == "Status":
+            if self.statussupported:
+                Domoticz.Status(message)
+            else:
+                Domoticz.Log(message)
+        elif level == "Normal":
+            Domoticz.Log(message)
        
       
 
@@ -375,11 +471,38 @@ def JsonToTimers(device, data):
     plan = json.loads(data)
     timers = []
     for day in plan:
+        if day == "temps":
+            continue 
         timerday = dom.TimerDays[day.capitalize()]
         for tmr in plan[day]:
             timers.append(dom.SetPointTimer(device, Active=True, Days=timerday, Temperature=tmr[1], Time=tmr[0], Type=dom.TimerTypes.TME_TYPE_ON_TIME))
     
     return timers
+
+def DomoticzAPICall(APICall):
+
+    resultJson = None
+    url = "http://{}:{}/json.htm?{}".format(Parameters["Address"], Parameters["Port"], parse.quote(APICall, safe="&="))
+    Domoticz.Debug("Calling domoticz API: {}".format(url))
+    try:
+        req = request.Request(url)
+        if Parameters["Username"] != "":
+            Domoticz.Debug("Add authentification for user {}".format(Parameters["Username"]))
+            credentials = ('%s:%s' % (Parameters["Username"], Parameters["Password"]))
+            encoded_credentials = base64.b64encode(credentials.encode('ascii'))
+            req.add_header('Authorization', 'Basic %s' % encoded_credentials.decode("ascii"))
+
+        response = request.urlopen(req)
+        if response.status == 200:
+            resultJson = json.loads(response.read().decode('utf-8'))
+            if resultJson["status"] != "OK":
+                Domoticz.Error("Domoticz API returned an error: status = {}".format(resultJson["status"]))
+                resultJson = None
+        else:
+            Domoticz.Error("Domoticz API: http error = {}".format(response.status))
+    except:
+        Domoticz.Error("Error calling '{}'".format(url))
+    return resultJson
 
 def DumpConfigToLog():
     for x in Parameters:

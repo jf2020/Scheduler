@@ -243,6 +243,13 @@
 			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 		}
 
+		.titre {
+			color: black;
+			font-size: 16px;
+			font-weight: bold;
+		}
+
+
 		.pointer {
 			display: none;
 		}
@@ -315,7 +322,7 @@
 </head>
 
 <body>
-	<div align="center">
+	<div align="center" style="background-color: white;">
 		<img id="pointer" class="pointer" src="../images/downArrow_white.png">
 		<img id="pointer-selected" class="pointer" src="../images/downArrow_red.png">
 		<img id="icon-comfort" class="pointer" src="../images/comfort.png">
@@ -326,21 +333,12 @@
 			<tr>
 				<td width="20%" align="center"><img src="../images/logo.png" width="40px"
 						height="40px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-				<td width="55%" align="center"><b>Thermostat Schedule</b></td>
-				<td width="25%" align="right"><select id="schedule-select"></select></td>
+				<td width="55%" align="center"><span class="titre">Thermostat Schedule</span</td>
+				<td width="25%" align="right"><select id="schedule-select" class="btnstyle3"></select></td>
 			</tr>
 		</table>
 
-
-		<table id="itemtablenostatus" style="display: inline;">
-			<tbody style="display: table-row-group;">
-				<tr>
-					<td style="display: inline-table;">
-						<div id="canvas"></div>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+		<div id="canvas"></div>
 
 		<div id="entryDetails" style="width:500px">
 			<br>
@@ -373,10 +371,10 @@
 			<br>
 		</div>
 
-		<p align="center" style="width:500px;">
-			<input type="submit" value="Cancel" onclick="window.location = '/';" />
-			<input type="submit" value="Save Schedule" onclick="saveSchedule();" />
-			<input type="submit" value="Reload" onclick="reloadSchedule();" />
+		<p align="center" style="width:500px;padding:10px;">
+			<input type="submit" class="btn btn-danger" value="Cancel" onclick="window.location = '/';" />
+			<input type="submit" class="btn btn-primary" value="Save Schedule" onclick="saveSchedule();" />
+			<input type="submit" class="btn btn-link" value="Reload" onclick="reloadSchedule();" />
 		</p>
 
 

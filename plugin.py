@@ -132,6 +132,7 @@ class BasePlugin:
         comfortIco = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/comfort.png'), True)
         ecoIco = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/eco.png'), True)
         nightIco = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/night.png'), True)
+        logo = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/logo.png'), True)
 
         #json = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/thermostat_schedule.json'), False)
 
@@ -140,6 +141,7 @@ class BasePlugin:
         html = html.replace('"../images/comfort.png"', '"data:image/png;base64, ' + base64.b64encode(comfortIco).decode("ascii") + '"')
         html = html.replace('"../images/eco.png"', '"data:image/png;base64, ' + base64.b64encode(ecoIco).decode("ascii") + '"')
         html = html.replace('"../images/night.png"', '"data:image/png;base64, ' + base64.b64encode(nightIco).decode("ascii") + '"')
+        html = html.replace('"../images/logo.png"', '"data:image/png;base64, ' + base64.b64encode(logo).decode("ascii") + '"')
         
 
         html = html.replace('<script src="../javascript/thermostat_schedule.js">', '<script>' + javascript)
@@ -440,9 +442,9 @@ def onDisconnect(Connection):
     global _plugin
     _plugin.onDisconnect(Connection)
 
-def onHeartbeat():
-    global _plugin
-    _plugin.onHeartbeat()
+#def onHeartbeat():
+    #global _plugin
+    #_plugin.onHeartbeat()
     
 #def onDeviceModified(Unit):
     #global _plugin

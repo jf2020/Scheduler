@@ -80,17 +80,19 @@
 
 					$("#canvas").empty();
 
+					var comfortTemp = 19;
+					var ecoTemp = 17;
+					var nightTemp = 12;
+
 					var temps = data['temps'];
 					if (temps) {
-						$("#comfortTemp").val(temps.C);
-						$("#ecoTemp").val(temps.E);
-						$("#nightTemp").val(temps.N);
+						comfortTemp = temps.C;
+						ecoTemp = temps.E;
+						nightTemp = temps.N;
 					}
-					else {
-						$("#comfortTemp").val(19.0);
-						$("#ecoTemp").val(17.0);
-						$("#nightTemp").val(12.0);
-					}
+					$("#comfortTemp").val(comfortTemp);
+					$("#ecoTemp").val(ecoTemp);
+					$("#nightTemp").val(nightTemp);
 
 					for (i = 0; i < days.length; i++) {
 						var day = days[i].toLowerCase();
@@ -111,8 +113,8 @@
 						for (j = 0; j < entries.length; j++) {
 							var entry = entries[j];
 							var c = 'C';
-							if (entry[1] == 17) c = 'E';
-							if (entry[1] == 12) c = 'N';
+							if (entry[1] == ecoTemp) c = 'E';
+							if (entry[1] == nightTemp) c = 'N';
 							ss.addScheduleEntry(new ScheduleEntry(entry[0], c, ss));
 						}
 					}
@@ -128,7 +130,7 @@
 				var ecoTemp = $("#ecoTemp").val() * 1;
 				var nightTemp = $("#nightTemp").val() * 1;
 
-				sched_json['temps'] = { C: comfortTemp, E: ecoTemp, N: nightTemp};
+				sched_json['temps'] = { C: comfortTemp, E: ecoTemp, N: nightTemp };
 
 				for (s = 0; s < scheduleSliders.length; s++) {
 					ss = scheduleSliders[s];

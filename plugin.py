@@ -206,7 +206,7 @@ class BasePlugin:
                 if path == '/thermostat_schedule.json':
 
                     timers = dom.SetPointTimer.loadbythermostat(self.__thermostat)
-                    data = str(TimersToJson(timers)).replace("'", "\"")
+                    data = str(TimersToJson(timers, self.Internals['ComfortTemp'], self.Internals['EcoTemp'],self.Internals['NightTemp'])).replace("'", "\"")
 
                     Connection.Send({"Status":"200", 
                                     "Headers": {"Connection": "keep-alive", 
@@ -284,7 +284,9 @@ class BasePlugin:
                               
                 if (path == "/save"):
 
-                    newtimers = JsonToTimers(self.__thermostat, jsn)
+                    newtimers = JsonToTimers(self.__thermostat, jsn, self)
+
+                    self.saveUserVar()
                     
                     oldtimers = dom.SetPointTimer.loadbythermostat(self.__thermostat)
                     
@@ -447,8 +449,8 @@ def onHeartbeat():
     #_plugin.onDeviceModified(Unit)    
 
 # Generic helper functions
-def TimersToJson(timers):
-    tmrdict = {  "monday": [], "tuesday": [], "wednesday": [], "thursday": [], "friday" : [], "saturday": [], "sunday": []}
+def TimersToJson(timers, c, e, n):
+    tmrdict = { "temps": {"C": c, "E": e,"N": n }, "monday": [], "tuesday": [], "wednesday": [], "thursday": [], "friday" : [], "saturday": [], "sunday": []}
     for timer in timers:
         if (timer.timertype == dom.TimerTypes.TME_TYPE_ON_TIME):
             if dom.TimerDays.Monday in timer.days:
@@ -467,11 +469,14 @@ def TimersToJson(timers):
                 tmrdict["sunday"].append([f"{timer.hour:02d}:{timer.minute:02d}", timer.temperature ])   
     return tmrdict
         
-def JsonToTimers(device, data):
+def JsonToTimers(device, data, plugin):
     plan = json.loads(data)
     timers = []
     for day in plan:
         if day == "temps":
+            plugin.Internals['ComfortTemp'] = plan[day]["C"]
+            plugin.Internals['EcoTemp'] = plan[day]["E"]
+            plugin.Internals['NightTemp'] = plan[day]["N"]
             continue 
         timerday = dom.TimerDays[day.capitalize()]
         for tmr in plan[day]:

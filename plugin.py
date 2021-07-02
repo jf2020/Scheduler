@@ -28,6 +28,10 @@
         <param field="Address" label="IP Address" width="180px" required="true" default="192.168.1.x"/>
         <param field="Port" label="Domoticz Port" width="60px" required="true" default="8080"/>
         <param field="Mode1" label="Listener Port" width="60px" required="true" default="9005"/>
+        <param field="Mode2" label="Zones Thermostats (csv list of idx)" width="100px" required="true" default="0"/>
+        <param field="Mode3" label="Inside Temperature Sensors (csv list of idx)" width="100px" required="true" default="0"/>
+        <param field="Mode4" label="Heating Switches (csv list of idx)" width="100px" required="true" default="0"/>
+        <param field="Mode5" label="Outside Temperature Sensor" width="100px" required="false" default=""/>
         <param field="Mode6" label="Logging Level" width="200px">
             <options>
                 <option label="Normal" value="Normal"  default="true"/>
@@ -485,6 +489,22 @@ def JsonToTimers(device, data, plugin):
             timers.append(dom.SetPointTimer(device, Active=True, Days=timerday, Temperature=tmr[1], Time=tmr[0], Type=dom.TimerTypes.TME_TYPE_ON_TIME))
     
     return timers
+
+def parseCSV(strCSV):
+    listvals = []
+    i=0
+    for value in strCSV.split(","):
+        try:
+            if i == 5:
+                val = float(value)
+            else:
+                val = int(value)
+        except:
+            pass
+        else:
+            listvals.append(val)
+        i+=1
+    return listvals
 
 def DomoticzAPICall(APICall):
 

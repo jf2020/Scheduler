@@ -15,7 +15,18 @@
         <h3>Configuration</h3>
 		Ensure Custom tab is enabled at Domoticz settings.
         Create Hardware, specify Domoticz connection and separate port.
-		Observe new menu item under "Custom" tab.
+        Enter a list of zones names using a comma separated list e.g.: Kitchen,Bedroom,Family Room
+        Enter a list of temperature sensors for each zone in the same zone order e.g.: 14,18,23 (14 will be the temp sensor for kitchen, 18 for Bedroom, etc.)
+        - you can use the same sensor for more than one zone e.g.: 14,18,14
+        - you can use more than one sensor per zone by separating them by -. The resulting temp for that zone will be the average of the defined sensors. e.g; 14-15,18,23
+        Enter a list of switches for each zone in the same order e.g.: 101,102,103
+        - you can use more than one switch per zone by separating them by -. All switches associated with the same zone will be turned on or off. e.g; 14-15,18,23
+
+        The plugin will create a thermostat device for each defined zone with the provided zone name. 
+        You are responsible for creating the temperature sensors and switches to associate to each zone and providing their idx to the plugin. 
+
+		Observe new menu item   "Heating Scheduler" under "Custom" tab.
+
 		<h3>Prerequisites</h3>
 		Plugin requires Domoticz-API module
 		https://github.com/ArtBern/Domoticz-API
@@ -28,7 +39,7 @@
         <param field="Address" label="IP Address" width="180px" required="true" default="192.168.1.x"/>
         <param field="Port" label="Domoticz Port" width="60px" required="true" default="8080"/>
         <param field="Mode1" label="Listener Port" width="60px" required="true" default="9005"/>
-        <param field="Mode2" label="Zones Thermostats (csv list of idx)" width="100px" required="true" default="0"/>
+        <param field="Mode2" label="Zones Thermostats (csv list of zone names)" width="100px" required="true" default="0"/>
         <param field="Mode3" label="Inside Temperature Sensors (csv list of idx)" width="100px" required="true" default="0"/>
         <param field="Mode4" label="Heating Switches (csv list of idx)" width="100px" required="true" default="0"/>
         <param field="Mode5" label="Outside Temperature Sensor" width="100px" required="false" default=""/>

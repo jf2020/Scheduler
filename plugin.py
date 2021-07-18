@@ -39,9 +39,9 @@
         <param field="Address" label="IP Address" width="180px" required="true" default="192.168.1.x"/>
         <param field="Port" label="Domoticz Port" width="60px" required="true" default="8080"/>
         <param field="Mode1" label="Listener Port" width="60px" required="true" default="9005"/>
-        <param field="Mode2" label="Zones Thermostats (csv list of zone names)" width="100px" required="true" default="0"/>
-        <param field="Mode3" label="Inside Temperature Sensors (csv list of idx)" width="100px" required="true" default="0"/>
-        <param field="Mode4" label="Heating Switches (csv list of idx)" width="100px" required="true" default="0"/>
+        <param field="Mode2" label="Zones Thermostats (csv list of zone names)" width="600px" required="true" default="0"/>
+        <param field="Mode3" label="Inside Temperature Sensors (csv list of idx)" width="200px" required="true" default="0"/>
+        <param field="Mode4" label="Heating Switches (csv list of idx)" width="200px" required="true" default="0"/>
         <param field="Mode5" label="Outside Temperature Sensor" width="100px" required="false" default=""/>
         <param field="Mode6" label="Logging Level" width="200px">
             <options>
@@ -183,7 +183,7 @@ class BasePlugin:
 
             dev = Devices[i]
             dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = zone)
-            
+
             self.__thermostat.append(dom.Device(self.__domServer, Devices[i].ID))
 
         # if (len(Devices) == 0):

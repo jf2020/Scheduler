@@ -167,17 +167,33 @@ class BasePlugin:
         html = html.replace('"../timer_plans.json"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/timer_plans.json"')
         html = html.replace('"save"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/save"')
         html = html.replace('"changetimerplan"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/changetimerplan"')
-        
-        if (len(Devices) == 0):
-            Domoticz.Device(Name=Parameters['Name'], Unit=1, Type=242, Subtype=1, Used=1).Create()
+
+
+        zones = Parameters["Mode2"].split(";")
+
+        #delete
+        for dev in Devices :
+            if dev.Unit > len(zones) :
+                dev.Delete()
+
+        self.__thermostat = []
+        for i, zone in enumerate(zones, start = 1):  # default start at 0, need 1
+            if i in Devices :
+                dev = Devices[i]
+                dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = zone)
+            else :
+                Domoticz.Device(Name=zone, Unit=i, Type=242, Subtype=1, Used=1).Create()
+            self.__thermostat.append(dom.Device(self.__domServer, Devices[i].ID))
+
+        # if (len(Devices) == 0):
+        #     Domoticz.Device(Name=Parameters['Name'], Unit=1, Type=242, Subtype=1, Used=1).Create()
         
         self.__filename = Parameters['StartupFolder'] + 'www/templates/Scheduler-' + "".join(x for x in Parameters['Name'] if x.isalnum()) + '.html'
         Utils.writeText(html, self.__filename)
 
         Domoticz.Log("Domoticz-API server is: " + str(self.__domServer))
 
-        self.__thermostat = dom.Device(self.__domServer, Devices[1].ID)
-   
+
         Domoticz.Log("Leaving on start")
         
     def onStop(self):
@@ -222,7 +238,7 @@ class BasePlugin:
 
                 if path == '/thermostat_schedule.json':
 
-                    timers = dom.SetPointTimer.loadbythermostat(self.__thermostat)
+                    timers = dom.SetPointTimer.loadbythermostat(self.__thermostat[0])
                     data = str(TimersToJson(timers, self.Internals['ComfortTemp'], self.Internals['EcoTemp'],self.Internals['NightTemp'])).replace("'", "\"")
 
                     Connection.Send({"Status":"200", 
@@ -301,11 +317,11 @@ class BasePlugin:
                               
                 if (path == "/save"):
 
-                    newtimers = JsonToTimers(self.__thermostat, jsn, self)
+                    newtimers = JsonToTimers(self.__thermostat[0], jsn, self)
 
                     self.saveUserVar()
                     
-                    oldtimers = dom.SetPointTimer.loadbythermostat(self.__thermostat)
+                    oldtimers = dom.SetPointTimer.loadbythermostat(self.__thermostat[0])
                     
                     for oldtimer in oldtimers:
                         if (oldtimer.timertype is dom.TimerTypes.TME_TYPE_ON_TIME):
@@ -354,11 +370,11 @@ class BasePlugin:
     def onCommand(self, Unit, Command, Level, Hue):
         Domoticz.Log("onCommand called for Unit " + str(Unit) + ": Parameter '" + str(Command) + "', Level: " + str(Level))
         
-        currentValue = self.__thermostat.get_value("SetPoint")
+        currentValue = self.__thermostat[0].get_value("SetPoint")
         if (str(currentValue) == str(Level)):
             return
         
-        self.__thermostat.set_value("setpoint", Level) 
+        self.__thermostat[0].set_value("setpoint", Level)
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):
         Domoticz.Log("Notification: " + Name + "," + Subject + "," + Text + "," + Status + "," + str(Priority) + "," + Sound + "," + ImageFile)

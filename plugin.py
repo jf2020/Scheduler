@@ -169,7 +169,7 @@ class BasePlugin:
         html = html.replace('"changetimerplan"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/changetimerplan"')
 
 
-        zones = Parameters["Mode2"].split(";")
+        zones = Parameters["Mode2"].split(",")
 
         #delete
         for i in Devices :

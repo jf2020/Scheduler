@@ -23,11 +23,6 @@
 	<script>
 
 		$(function () {
-			// turn this on for debugging on IOS devices
-
-			/* window.onerror = function( error ) {
-				alert( error );
-			}; */
 
 			if (navigator.platform.indexOf("iPad") != -1) {
 				$('meta[ name=viewport ]').attr('content', 'user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0');
@@ -350,7 +345,8 @@
 			Selected Entry:
 			<input type="text" id="time" name="time" readonly style="border:0; color:#ff0000; background-color: white; font-weight:bold;" />
 			<input type="submit" value="Delete" onclick="deleteSelected();" />
-
+		</div>
+        
 			<br><br>
 			<div class="temps" align="center" style="width:500px;">
 				<button id="comfortTempBtn" class="btn-temp" onclick="setPoint('C');"><i class="btnico i-comfort"></i>
@@ -374,7 +370,6 @@
 			</div>
 			<br>
 			<br>
-		</div>
 
 		<p align="center" style="width:500px;padding:10px;">
 			<input type="submit" class="btn btn-danger" value="Cancel" onclick="window.location = '/';" />

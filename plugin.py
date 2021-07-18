@@ -172,9 +172,9 @@ class BasePlugin:
         zones = Parameters["Mode2"].split(";")
 
         #delete
-        for dev in Devices :
-            if dev.Unit > len(zones) :
-                dev.Delete()
+        for i in Devices :
+            if i > len(zones) :
+                Devices[i].Delete()
 
         self.__thermostat = []
         for i, zone in enumerate(zones, start = 1):  # default start at 0, need 1

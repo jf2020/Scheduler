@@ -178,11 +178,12 @@ class BasePlugin:
 
         self.__thermostat = []
         for i, zone in enumerate(zones, start = 1):  # default start at 0, need 1
-            if i in Devices :
-                dev = Devices[i]
-                dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = zone)
-            else :
+            if i not in Devices :
                 Domoticz.Device(Name=zone, Unit=i, Type=242, Subtype=1, Used=1).Create()
+
+            dev = Devices[i]
+            dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = zone)
+            
             self.__thermostat.append(dom.Device(self.__domServer, Devices[i].ID))
 
         # if (len(Devices) == 0):

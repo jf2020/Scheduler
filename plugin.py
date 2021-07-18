@@ -180,7 +180,7 @@ class BasePlugin:
         for i, zone in enumerate(zones, start = 1):  # default start at 0, need 1
             if i not in Devices :
                 Domoticz.Device(Name=zone, Unit=i, Type=242, Subtype=1, Used=1).Create()
-                Devices[i].Update(nValue=int(self.Internals["EcoTemp"]), sValue=self.Internals["EcoTemp"], Name = zone)
+                Devices[i].Update(nValue=self.Internals["EcoTemp"], sValue=str(self.Internals["EcoTemp"]), Name = zone)
             else :
                 dev = Devices[i]
                 dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = zone)

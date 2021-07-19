@@ -117,6 +117,11 @@ class Zone:
             Domoticz.Log("Zone {} now {}".format(self.name, newState))
             self.__setSwitchState(newState)
 
+    class forJson:
+        def __init__ (self, name, idx) :
+            self.Name = name
+            self.idx = idx
+
 
 class BasePlugin:
     enabled = False
@@ -336,8 +341,13 @@ class BasePlugin:
                                     "Data": timerplans})               
 
                 elif path == '/zones.json':
+                    list = []
+                    for i,zone in enumerate(self.zones) :
+                        list.append(Zone.forJson(zone.name,i))
 
-                    zones = "[ {'Name': 'Cuisine', 'idx': 0 }, {'Name': 'Salon', 'idx': 1 }, {'Name': 'Chambre', 'idx': 2 } ]".replace("'", "\"")
+                    zones = json.dumps(list)
+
+                    # zones = "[ {'Name': 'Cuisine', 'idx': 0 }, {'Name': 'Salon', 'idx': 1 }, {'Name': 'Chambre', 'idx': 2 } ]".replace("'", "\"")
                             
                     Connection.Send({"Status":"200", 
                                     "Headers": {"Connection": "keep-alive", 

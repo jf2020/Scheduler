@@ -232,7 +232,7 @@ class BasePlugin:
                 Devices[i].Delete()
             elif i % 2 == 1 and Devices[i].Type != 242 :
                 Devices[i].Delete()
-            elif Devices[i].Type != 244 :
+            elif i % 2 == 0 and Devices[i].Type != 244 :
                 Devices[i].Delete()
 
         optionsModeZone = {"LevelActions": "||",

@@ -84,9 +84,10 @@ from accept_types import get_best_match
 
 class Zone:
 
-    def __init__(self, name, thermostat, tempDetector, switch):
+    def __init__(self, name, thermostat, modeSelector, tempDetector, switch):
         self.name = name
         self.thermostat = thermostat
+        self.modeSelector = modeSelector
         self.tempDetector = tempDetector
         self.switch = switch
 
@@ -218,28 +219,52 @@ class BasePlugin:
         idxTemps = Parameters["Mode3"].split(",")
         idxSwitches = Parameters["Mode4"].split(",")
 
-        if len(zoneNames) != len(idxTemps) or len(zoneNames) != len(idxSwitches) :
-            Domoticz.Error("Number of Inside Temperature Sensors or number of Heating Switches don't match number of Zones")
+        if len(zoneNames) == 0 :
+            Domoticz.Error("At least one zone meust be defined!")
+        if len(zoneNames) != len(idxTemps) :
+            Domoticz.Error("The number of Inside Temperature Sensors doesn't match the number of Zones")
+        if len(zoneNames) != len(idxSwitches) :
+            Domoticz.Error("The number of Heating Switches doesn't match the number of Zones")
 
-        #delete
+        #delete if too many devices or wrong device type
         for i in Devices :
-            if i > len(zoneNames) :
+            if i > len(zoneNames) * 2 :
                 Devices[i].Delete()
+            elif i % 2 == 1 and Devices[i].Type != 242 :
+                Devices[i].Delete()
+            elif Devices[i].Switchtype != 18 :
+                Devices[i].Delete()
+
+        optionsModeZone = {"LevelActions": "||",
+                       "LevelNames": "Off|Normal|Economy",
+                       "LevelOffHidden": "true",
+                       "SelectorStyle": "0"}
 
         self.__thermostat = []
         for i, name in enumerate(zoneNames, start = 1):  # default start at 0, need 1
-            if i not in Devices :
-                Domoticz.Device(Name=name, Unit=i, Type=242, Subtype=1, Used=1).Create()
-                Devices[i].Update(nValue=0, sValue=str(self.Internals["EcoTemp"]), Name = name)
+            unitId = i*2 -1
+            if unitId not in Devices :
+                Domoticz.Device(Name=name, Unit=unitId, Type=242, Subtype=1, Used=1).Create()
+                Devices[unitId].Update(nValue=0, sValue=str(self.Internals["EcoTemp"]), Name = name)
             else :
                 dev = Devices[i]
                 dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = name)
 
-            thermostat = dom.Device(self.__domServer, Devices[i].ID)
+            unitId = i*2
+            if unitId not in Devices :
+                Domoticz.Device(Name=name, Unit=unitId,  TypeName="Selector Switch", Switchtype=18, Image=15, Options=optionsModeZone, Used=1).Create()
+                Devices[unitId].Update(nValue=0, sValue="10", Name = "Mode " + name)  # mode normal by default
+            else :
+                dev = Devices[unitId]
+                dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = "Mode " + name)
+
+            thermostat = dom.Device(self.__domServer, Devices[i*2-1].ID)
+            modeSelector = dom.Device(self.__domServer, Devices[i*2].ID)
             self.__thermostat.append(thermostat)
-            # self.zones.append(Zone(Devices[i].Name, thermostat, idxTemps[i-1], idxSwitches[i-1]))
+
             self.zones.append(Zone(Devices[i].Name,\
                                    thermostat, \
+                                   modeSelector, \
                                    dom.Device(self.__domServer, idxTemps[i-1]),\
                                    dom.Device(self.__domServer, idxSwitches[i-1])))
 
@@ -249,8 +274,6 @@ class BasePlugin:
                                                                                          zone.tempDetector.get_value("idx"),\
                                                                                          zone.switch.get_value("idx")))
 
-        # if (len(Devices) == 0):
-        #     Domoticz.Device(Name=Parameters['Name'], Unit=1, Type=242, Subtype=1, Used=1).Create()
         
         self.__filename = Parameters['StartupFolder'] + 'www/templates/Scheduler-' + "".join(x for x in Parameters['Name'] if x.isalnum()) + '.html'
         Utils.writeText(html, self.__filename)

@@ -341,11 +341,11 @@ class BasePlugin:
                                     "Data": timerplans})               
 
                 elif path == '/zones.json':
-                    list = []
+                    listZones = []
                     for i,zone in enumerate(self.zones) :
-                        list.append(Zone.forJson(zone.name,i))
+                        listZones.append(Zone.forJson(zone.name,i))
 
-                    zones = json.dumps(list).replace("'", "\"")
+                    zones = list(listZones.dicts())
 
                     # zones = "[ {'Name': 'Cuisine', 'idx': 0 }, {'Name': 'Salon', 'idx': 1 }, {'Name': 'Chambre', 'idx': 2 } ]".replace("'", "\"")
                             

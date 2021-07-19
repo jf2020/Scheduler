@@ -42,10 +42,60 @@
 				}
 			}
 
-			reloadSchedule = function () {
+			loadZones = function () {
+
+				$.getJSON("../zones.json", function (data) {
+
+					$('#zone-select').empty();
+					$('#zone-select').off('change', '**');
+
+					for (i = 0; i < data.length; i++) {
+						$('#zone-select').append($('<option>', {
+							value: data[i].idx,
+							text: data[i].Name
+						}));
+
+						if (data[i].isactive == "true") {
+							$('#schedule-select').val(data[i].idx);
+						}
+					}
+
+					$('#zone-select').on('change', function () {
+
+						//debugger;
+						reloadSchedule($('#zone-select').find(":selected").val());
+					});
+
+				});
+			};
+
+			reloadSchedule = function (idx) {
+
+				active_zone = {};
+				active_zone["zone"] = idx;
+
+				$.ajax({
+					url: "getschedule",
+					data: JSON.stringify(active_zone, null, 4),
+					contentType: 'application/json',
+					async: false,
+					type: 'POST',
+					success: function (data) {
+						if (data.status == "ERROR") {
+							bootbox.alert($.t(data.message));
+						}
+						//wait 1 second
+						setTimeout(function () {
+							loadSchedule(data);
+						}, 1000);
+					},
+					error: function (jqxhr, status, error) {
+						HideNotify();
+						bootbox.alert($.t('Problem loading schedule.' + status + '. ' + error));
+					}
+				});
 
 				$.getJSON("../timer_plans.json", function (data) {
-
 
 					$('#schedule-select').empty();
 					$('#schedule-select').off('change', '**');
@@ -70,53 +120,54 @@
 					});
 
 				});
+			};
 
-				$.getJSON("../thermostat_schedule.json", function (data) {
+			loadSchedule = function (data) {
 
-					$("#canvas").empty();
+				$("#canvas").empty();
 
-					var comfortTemp = 19;
-					var ecoTemp = 17;
-					var nightTemp = 12;
+				var comfortTemp = 19;
+				var ecoTemp = 17;
+				var nightTemp = 12;
 
-					var temps = data['temps'];
-					if (temps) {
-						comfortTemp = temps.C;
-						ecoTemp = temps.E;
-						nightTemp = temps.N;
+				var temps = data['temps'];
+				if (temps) {
+					comfortTemp = temps.C;
+					ecoTemp = temps.E;
+					nightTemp = temps.N;
+				}
+				$("#comfortTemp").val(comfortTemp);
+				$("#ecoTemp").val(ecoTemp);
+				$("#nightTemp").val(nightTemp);
+
+				for (i = 0; i < days.length; i++) {
+					var day = days[i].toLowerCase();
+					var canvas = $('<canvas>').attr({
+						id: "canvas-" + day,
+						width: 800,
+						height: 78
+					}).appendTo("#canvas")[0];
+
+					$('<br>').appendTo("#canvas");
+
+					var ss = new ScheduleSlider(days[i], canvas, "pointer", "pointer-selected", scheduleSliders);
+
+					scheduleSliders.push(ss);
+
+					var entries = data[day]
+
+					for (j = 0; j < entries.length; j++) {
+						var entry = entries[j];
+						var c = 'C';
+						if (entry[1] == ecoTemp) c = 'E';
+						if (entry[1] == nightTemp) c = 'N';
+						ss.addScheduleEntry(new ScheduleEntry(entry[0], c, ss));
 					}
-					$("#comfortTemp").val(comfortTemp);
-					$("#ecoTemp").val(ecoTemp);
-					$("#nightTemp").val(nightTemp);
+				}
 
-					for (i = 0; i < days.length; i++) {
-						var day = days[i].toLowerCase();
-						var canvas = $('<canvas>').attr({
-							id: "canvas-" + day,
-							width: 1200,
-							height: 78
-						}).appendTo("#canvas")[0];
+			};
 
-						$('<br>').appendTo("#canvas");
-
-						var ss = new ScheduleSlider(days[i], canvas, "pointer", "pointer-selected", scheduleSliders);
-
-						scheduleSliders.push(ss);
-
-						var entries = data[day]
-
-						for (j = 0; j < entries.length; j++) {
-							var entry = entries[j];
-							var c = 'C';
-							if (entry[1] == ecoTemp) c = 'E';
-							if (entry[1] == nightTemp) c = 'N';
-							ss.addScheduleEntry(new ScheduleEntry(entry[0], c, ss));
-						}
-					}
-
-				});
-			}
-
+			loadZones();
 			reloadSchedule();
 
 			saveSchedule = function () {
@@ -125,6 +176,7 @@
 				var ecoTemp = $("#ecoTemp").val() * 1;
 				var nightTemp = $("#nightTemp").val() * 1;
 
+				sched_json['zone'] = selectedZone;
 				sched_json['temps'] = { C: comfortTemp, E: ecoTemp, N: nightTemp };
 
 				for (s = 0; s < scheduleSliders.length; s++) {
@@ -331,9 +383,10 @@
 
 		<table width="500px">
 			<tr>
-				<td width="20%" align="center"><img src="../images/logo.png" width="40px"
+				<td width="64px" align="center"><img src="../images/logo.png" width="40px"
 						height="40px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-				<td width="55%" align="center"><span class="titre">Thermostat Schedule</span</td>
+				<td width="45%" align="center"><span class="titre">Heating Scheduler</span></td>
+				<td width="25%" align="right"><select id="zone-select" class="btnstyle3"></select></td>
 				<td width="25%" align="right"><select id="schedule-select" class="btnstyle3"></select></td>
 			</tr>
 		</table>
@@ -343,33 +396,34 @@
 		<div id="entryDetails" style="width:500px">
 			<br>
 			Selected Entry:
-			<input type="text" id="time" name="time" readonly style="border:0; color:#ff0000; background-color: white; font-weight:bold;" />
+			<input type="text" id="time" name="time" readonly
+				style="border:0; color:#ff0000; background-color: white; font-weight:bold;" />
 			<input type="submit" value="Delete" onclick="deleteSelected();" />
 		</div>
-        
-			<br><br>
-			<div class="temps" align="center" style="width:500px;">
-				<button id="comfortTempBtn" class="btn-temp" onclick="setPoint('C');"><i class="btnico i-comfort"></i>
-					Comfort</button>
 
-				<input id="comfortTemp"class="form-control" type="number" step="0.1" min="0" max="30">
-				<span>°C</span>
+		<br><br>
+		<div class="temps" align="center" style="width:500px;">
+			<button id="comfortTempBtn" class="btn-temp" onclick="setPoint('C');"><i class="btnico i-comfort"></i>
+				Comfort</button>
 
-				<button id="ecoTempBtn" class="btn-temp" onclick="setPoint('E');"><i class="btnico i-eco"></i>
-					Eco</button>
+			<input id="comfortTemp" class="form-control" type="number" step="0.1" min="0" max="30">
+			<span>°C</span>
 
-				<input id="ecoTemp" class="form-control" type="number" step="0.1" min="0" max="30">
-				<span>°C</span>
+			<button id="ecoTempBtn" class="btn-temp" onclick="setPoint('E');"><i class="btnico i-eco"></i>
+				Eco</button>
 
-				<button id="nightTempBtn" class="btn-temp" onclick="setPoint('N');"><i class="btnico i-night"></i>
-					Night</button>
+			<input id="ecoTemp" class="form-control" type="number" step="0.1" min="0" max="30">
+			<span>°C</span>
 
-				<input id="nightTemp" class="form-control" type="number" step="0.1" min="0" max="30">
-				<span>°C</span>
+			<button id="nightTempBtn" class="btn-temp" onclick="setPoint('N');"><i class="btnico i-night"></i>
+				Night</button>
 
-			</div>
-			<br>
-			<br>
+			<input id="nightTemp" class="form-control" type="number" step="0.1" min="0" max="30">
+			<span>°C</span>
+
+		</div>
+		<br>
+		<br>
 
 		<p align="center" style="width:500px;padding:10px;">
 			<input type="submit" class="btn btn-danger" value="Cancel" onclick="window.location = '/';" />

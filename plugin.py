@@ -233,8 +233,8 @@ class BasePlugin:
         for zone in self.zones :
             Domoticz.Log("Zone : {}, setPoint : {}, idxTemp : {}, idxSwitch : {}".format(zone.name,\
                                                                                          zone.thermostat.get_value("SetPoint"),\
-                                                                                         zone.idxTemp,\
-                                                                                         zone.idxSwitch))
+                                                                                         zone.tempDetector.get_value("idx"),\
+                                                                                         zone.switch.get_value("idx")))
 
         # if (len(Devices) == 0):
         #     Domoticz.Device(Name=Parameters['Name'], Unit=1, Type=242, Subtype=1, Used=1).Create()

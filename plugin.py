@@ -117,10 +117,10 @@ class Zone:
             Domoticz.Log("Zone {} now {}".format(self.name, newState))
             self.__setSwitchState(newState)
 
-    class forJson:
-        def __init__ (self, name, idx) :
-            self.Name = name
-            self.idx = idx
+class ZoneForJson:
+    def __init__ (self, name, idx) :
+        self.Name = name
+        self.idx = idx
 
 
 class BasePlugin:
@@ -343,7 +343,7 @@ class BasePlugin:
                 elif path == '/zones.json':
                     listZones = []
                     for i,zone in enumerate(self.zones) :
-                        listZones.append(Zone.forJson(zone.name,i))
+                        listZones.append(ZoneForJson(zone.name,i))
                     Domoticz.Log("List zones : {}".format(listZones))
 
                     zones = vars(listZones)

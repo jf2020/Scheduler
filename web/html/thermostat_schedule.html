@@ -71,30 +71,6 @@
 
 			reloadSchedule = function (idx) {
 
-				active_zone = {};
-				active_zone["zone"] = idx;
-
-				$.ajax({
-					url: "getschedule",
-					data: JSON.stringify(active_zone, null, 4),
-					contentType: 'application/json',
-					async: false,
-					type: 'POST',
-					success: function (data) {
-						if (data.status == "ERROR") {
-							bootbox.alert($.t(data.message));
-						}
-						//wait 1 second
-						setTimeout(function () {
-							loadSchedule(data);
-						}, 1000);
-					},
-					error: function (jqxhr, status, error) {
-						HideNotify();
-						bootbox.alert($.t('Problem loading schedule.' + status + '. ' + error));
-					}
-				});
-
 				$.getJSON("../timer_plans.json", function (data) {
 
 					$('#schedule-select').empty();
@@ -120,6 +96,31 @@
 					});
 
 				});
+
+				active_zone = {};
+				active_zone["zone"] = idx;
+
+				$.ajax({
+					url: "getschedule",
+					data: JSON.stringify(active_zone, null, 4),
+					contentType: 'application/json',
+					async: false,
+					type: 'POST',
+					success: function (data) {
+						if (data.status == "ERROR") {
+							bootbox.alert($.t(data.message));
+						}
+						//wait 1 second
+						setTimeout(function () {
+							loadSchedule(data);
+						}, 1000);
+					},
+					error: function (jqxhr, status, error) {
+						HideNotify();
+						bootbox.alert($.t('Problem loading schedule.' + status + '. ' + error));
+					}
+				});
+
 			};
 
 			loadSchedule = function (data) {

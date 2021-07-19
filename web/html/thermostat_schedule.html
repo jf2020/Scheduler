@@ -173,6 +173,7 @@
 				var comfortTemp = $("#comfortTemp").val() * 1;
 				var ecoTemp = $("#ecoTemp").val() * 1;
 				var nightTemp = $("#nightTemp").val() * 1;
+				var selectedZone = $('#zone-select').find(":selected").val() * 1;
 
 				sched_json['zone'] = selectedZone;
 				sched_json['temps'] = { C: comfortTemp, E: ecoTemp, N: nightTemp };

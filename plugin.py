@@ -97,14 +97,15 @@ class BasePlugin:
     httpServerConn = None
     httpServerConns = {}
     domServer = None
-    zoneDatas = []
-    
+
     
     def __init__(self):
         self.__filename = ""
         self.debug = False
         self.loglevel = None
         self.statussupported = True
+        self.heartBeatCtr = 0
+        self.zoneDatas = []
 
         self.InternalsDefaults = {
             'ComfortTemp': float(19), # temperature comfort
@@ -413,6 +414,14 @@ class BasePlugin:
 
     def onHeartbeat(self):
         Domoticz.Log("onHeartbeat called")
+        if self.heartBeatCtr % 6 == 0 :
+            Domoticz.Log("onHeartbeat do something")
+            # do what must be done
+            self.heartBeatCtr = 1
+        else :
+            self.heartBeatCtr += 1
+        Domoticz.Log("Leaving onHeartbeat")
+
         
 #    def onDeviceModified(self, Unit):
 #        Domoticz.Log("onCommand called for Unit " + str(Unit))
@@ -499,9 +508,9 @@ def onDisconnect(Connection):
     global _plugin
     _plugin.onDisconnect(Connection)
 
-#def onHeartbeat():
-    #global _plugin
-    #_plugin.onHeartbeat()
+def onHeartbeat():
+    global _plugin
+    _plugin.onHeartbeat()
     
 #def onDeviceModified(Unit):
     #global _plugin

@@ -107,17 +107,15 @@ class Zone:
         temp = self.__getTemp()
         state = self.__getSwitchState()
         setPoint = self.__getSetPoint()
-        Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
+        # Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
         newState = "Off"
-        if temp < setPoint :
-            Domoticz.Log("Zone {} must heat".format(self.name))
+        offset = 0.1
+        if ( state == "On" and temp < setPoint + offset ) or (state == "Off" and temp < setPoint - offset ) :
+            # Domoticz.Log("Zone {} must heat".format(self.name))
             newState = "On"
         if newState != state :
-            Domoticz.Log("Zone {} change status, new status".format(self.name, newState))
+            Domoticz.Log("Zone {} now {}".format(self.name, newState))
             self.__setSwitchState(newState)
-
-
-
 
 
 class BasePlugin:
@@ -447,12 +445,11 @@ class BasePlugin:
 
     def onHeartbeat(self):
 #        Domoticz.Log("onHeartbeat called")
-        if self.heartBeatCtr % 6 == 0 :
+        if self.heartBeatCtr == 6 :
             # Domoticz.Log("onHeartbeat do something")
             # do what must be done
             for zone in self.zones :
                 zone.process()
-
             self.heartBeatCtr = 1
         else :
             self.heartBeatCtr += 1

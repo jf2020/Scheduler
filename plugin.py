@@ -82,13 +82,34 @@ import magic
 #pip3 install accept-types
 from accept_types import get_best_match
 
-class zoneData:
+class Zone:
 
-    def __init__(self, name, thermostat, idxTemp, idxSwitch):
+    def __init__(self, name, thermostat, tempDetector, switch):
         self.name = name
         self.thermostat = thermostat
-        self.idxTemp = idxTemp
-        self.idxSwitch = idxSwitch
+        self.tempDetector = tempDetector
+        self.switch = switch
+
+    def __getTemp(self):
+        return float(self.tempDetector.get_value("Temp"))
+
+    def __getSwitchState(self):
+        return self.switch.get_value("Status")
+
+    def __getSetPoint(self):
+        return float(self.thermostat.get_value("SetPoint"))
+
+    def __setSwitchState(self, state):
+        return self.switch.set_value("Status", state)
+
+    def process(self):
+        temp = self.__getTemp()
+        state = self.__getSwitchState()
+        setPoint = self.__getSetPoint()
+        Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
+        return
+
+
 
 
 class BasePlugin:
@@ -105,7 +126,7 @@ class BasePlugin:
         self.loglevel = None
         self.statussupported = True
         self.heartBeatCtr = 0
-        self.zoneDatas = []
+        self.zones = []
 
         self.InternalsDefaults = {
             'ComfortTemp': float(19), # temperature comfort
@@ -180,32 +201,36 @@ class BasePlugin:
         html = html.replace('"changetimerplan"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/changetimerplan"')
 
 
-        zones = Parameters["Mode2"].split(",")
-        idxTemp = Parameters["Mode3"].split(",")
+        zoneNames = Parameters["Mode2"].split(",")
+        idxTemps = Parameters["Mode3"].split(",")
         idxSwitches = Parameters["Mode4"].split(",")
 
-        if len(zones) != len(idxTemp) or len(zones) != len(idxSwitches) :
+        if len(zoneNames) != len(idxTemps) or len(zoneNames) != len(idxSwitches) :
             Domoticz.Error("Number of Inside Temperature Sensors or number of Heating Switches don't match number of Zones")
 
         #delete
         for i in Devices :
-            if i > len(zones) :
+            if i > len(zoneNames) :
                 Devices[i].Delete()
 
         self.__thermostat = []
-        for i, zone in enumerate(zones, start = 1):  # default start at 0, need 1
+        for i, name in enumerate(zoneNames, start = 1):  # default start at 0, need 1
             if i not in Devices :
-                Domoticz.Device(Name=zone, Unit=i, Type=242, Subtype=1, Used=1).Create()
-                Devices[i].Update(nValue=0, sValue=str(self.Internals["EcoTemp"]), Name = zone)
+                Domoticz.Device(Name=name, Unit=i, Type=242, Subtype=1, Used=1).Create()
+                Devices[i].Update(nValue=0, sValue=str(self.Internals["EcoTemp"]), Name = name)
             else :
                 dev = Devices[i]
-                dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = zone)
+                dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = name)
 
             thermostat = dom.Device(self.__domServer, Devices[i].ID)
             self.__thermostat.append(thermostat)
-            self.zoneDatas.append(zoneData(Devices[i].Name, thermostat, idxTemp[i-1], idxSwitches[i-1]))
+            # self.zones.append(Zone(Devices[i].Name, thermostat, idxTemps[i-1], idxSwitches[i-1]))
+            self.zones.append(Zone(Devices[i].Name,\
+                                   thermostat, \
+                                   dom.Device(self.__domServer, idxTemps[i-1]),\
+                                   dom.Device(self.__domServer, idxSwitches[i-1])))
 
-        for zone in self.zoneDatas :
+        for zone in self.zones :
             Domoticz.Log("Zone : {}, setPoint : {}, idxTemp : {}, idxSwitch : {}".format(zone.name,\
                                                                                          zone.thermostat.get_value("SetPoint"),\
                                                                                          zone.idxTemp,\
@@ -413,14 +438,17 @@ class BasePlugin:
             del self.httpServerConns[Connection.Name]
 
     def onHeartbeat(self):
-        Domoticz.Log("onHeartbeat called")
+#        Domoticz.Log("onHeartbeat called")
         if self.heartBeatCtr % 6 == 0 :
-            Domoticz.Log("onHeartbeat do something")
+            # Domoticz.Log("onHeartbeat do something")
             # do what must be done
+            for zone in self.zones :
+                zone.process()
+
             self.heartBeatCtr = 1
         else :
             self.heartBeatCtr += 1
-        Domoticz.Log("Leaving onHeartbeat")
+        # Domoticz.Log("Leaving onHeartbeat")
 
         
 #    def onDeviceModified(self, Unit):

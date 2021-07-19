@@ -346,7 +346,7 @@ class BasePlugin:
                         listZones.append(ZoneForJson(zone.name,i))
                     Domoticz.Log("List zones : {}".format(listZones))
 
-                    zones = vars(listZones)
+                    zones = json.dumps(listZones)
                     Domoticz.Log("List zones json : {}".format(zones))
                     # zones = "[ {'Name': 'Cuisine', 'idx': 0 }, {'Name': 'Salon', 'idx': 1 }, {'Name': 'Chambre', 'idx': 2 } ]".replace("'", "\"")
                             

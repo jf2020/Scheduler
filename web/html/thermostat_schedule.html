@@ -169,7 +169,8 @@
 			};
 
 			loadZones();
-			reloadSchedule();
+			reloadSchedule($('#zone-select').find(":selected").val());
+
 
 			saveSchedule = function () {
 				var sched_json = {};

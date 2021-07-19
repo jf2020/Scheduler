@@ -432,9 +432,13 @@ class BasePlugin:
                     j = json.loads(jsn)
                                                          
                     self.__domServer.setting.set_value("ActiveTimerPlan", j["activetimerplan"])
-                                      
-                    data = "{\"status\":\"OK\"}"
- 
+
+                elif (path == "/getschedule"):
+                    
+                    j = json.loads(jsn)
+                    timers = dom.SetPointTimer.loadbythermostat(self.__thermostat[j["zone"]])
+                    data = str(TimersToJson(timers, self.Internals['ComfortTemp'], self.Internals['EcoTemp'],self.Internals['NightTemp'])).replace("'", "\"")
+                                                         
                     Connection.Send({"Status":"200", 
                                 "Headers": {"Connection": "keep-alive", 
                                             "Accept-Encoding": "gzip, deflate",
@@ -445,14 +449,10 @@ class BasePlugin:
                                             "Pragma": "no-cache",
                                             "Expires": "0"},
                                 "Data": data})
-
-                elif (path == "/getschedule"):
-                    
-                    j = json.loads(jsn)
-                    timers = dom.SetPointTimer.loadbythermostat(self.__thermostat[j["zone"]])
-                    data = str(TimersToJson(timers, self.Internals['ComfortTemp'], self.Internals['EcoTemp'],self.Internals['NightTemp'])).replace("'", "\"")
-                                                         
-                    Connection.Send({"Status":"200", 
+                                
+                data = "{\"status\":\"OK\"}"
+ 
+                Connection.Send({"Status":"200", 
                                 "Headers": {"Connection": "keep-alive", 
                                             "Accept-Encoding": "gzip, deflate",
                                             "Access-Control-Allow-Origin":"http://" + Parameters['Address'] + ":" + Parameters['Port'] + "",

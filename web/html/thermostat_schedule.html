@@ -60,7 +60,7 @@
 					$('#zone-select').on('change', function () {
 
 						//debugger;
-						reloadSchedule($('#zone-select').find(":selected").val());
+						reloadSchedule(parseInt($('#zone-select').find(":selected").val()));
 					});
 
 				});
@@ -89,7 +89,7 @@
 						//debugger;
 						changeTimerPlan($('#schedule-select').find(":selected").val())
 
-						reloadSchedule($('#zone-select').find(":selected").val());
+						reloadSchedule(parseInt($('#zone-select').find(":selected").val()));
 					});
 
 				});
@@ -166,8 +166,7 @@
 			}
 
 			loadZones();
-			reloadSchedule(0);
-
+			reloadSchedule(parseInt($('#zone-select').find(":selected").val()));
 
 			saveSchedule = function () {
 				var sched_json = {};
@@ -212,7 +211,7 @@
 						//wait 1 second
 						setTimeout(function () {
 							HideNotify();
-							reloadSchedule($('#zone-select').find(":selected").val());
+							reloadSchedule(parseInt($('#zone-select').find(":selected").val()));
 						}, 1000);
 					},
 					error: function (jqxhr, status, error) {

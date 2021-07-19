@@ -367,7 +367,7 @@ class BasePlugin:
                 elif return_type == 'image/png' or return_type == 'image/x-icon':
                     data = Utils.readFile(filePath, True)
 
-                    LogMessage("Legth is " + str(len(data)))
+                    LogMessage("Length is " + str(len(data)))
      
                     Connection.Send({"Status":"200", 
                                     "Headers": {"Connection": "keep-alive", 

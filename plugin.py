@@ -400,11 +400,13 @@ class BasePlugin:
                               
                 if (path == "/save"):
 
-                    newtimers = JsonToTimers(self.__thermostat[0], jsn, self)
+                    j = json.load(jsn)
+                    zoneId = j["zone"]
+                    newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self)
 
                     self.saveUserVar()
                     
-                    oldtimers = dom.SetPointTimer.loadbythermostat(self.__thermostat[0])
+                    oldtimers = dom.SetPointTimer.loadbythermostat(self.__thermostat[zoneId])
                     
                     for oldtimer in oldtimers:
                         if (oldtimer.timertype is dom.TimerTypes.TME_TYPE_ON_TIME):
@@ -435,8 +437,6 @@ class BasePlugin:
                 elif (path == "/getschedule"):
                     
                     j = json.loads(jsn)
-                    Domoticz.Log("json : {}".format(j))
-
                     timers = dom.SetPointTimer.loadbythermostat(self.__thermostat[j["zone"]])
                     data = str(TimersToJson(timers, self.Internals['ComfortTemp'], self.Internals['EcoTemp'],self.Internals['NightTemp'])).replace("'", "\"")
                                                          

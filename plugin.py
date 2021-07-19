@@ -223,7 +223,7 @@ class BasePlugin:
                 Domoticz.Device(Name=name, Unit=i, Type=242, Subtype=1, Used=1).Create()
                 Devices[i].Update(nValue=0, sValue=str(self.Internals["EcoTemp"]), Name = name)
             else :
-                dev = Devices[i]x
+                dev = Devices[i]
                 dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = name)
 
             thermostat = dom.Device(self.__domServer, Devices[i].ID)

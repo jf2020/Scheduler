@@ -325,23 +325,7 @@ class BasePlugin:
 
                 return_type = mimetype
 
-                if path == '/thermostat_schedule.json':
-
-                    timers = dom.SetPointTimer.loadbythermostat(self.__thermostat[0])
-                    data = str(TimersToJson(timers, self.Internals['ComfortTemp'], self.Internals['EcoTemp'],self.Internals['NightTemp'])).replace("'", "\"")
-
-                    Connection.Send({"Status":"200", 
-                                    "Headers": {"Connection": "keep-alive", 
-                                                "Accept-Encoding": "gzip, deflate",
-                                                "Access-Control-Allow-Origin":"http://" + Parameters['Address'] + ":" + Parameters['Port'] + "",
-                                                "Cache-Control": "no-cache, no-store, must-revalidate",
-                                                "Content-Type": "application/json; charset=UTF-8",
-                                                "Content-Length":""+str(len(data))+"",
-                                                "Pragma": "no-cache",
-                                                "Expires": "0"},
-                                    "Data": data})
-                                    
-                elif path == '/timer_plans.json':
+                if path == '/timer_plans.json':
 
                     plans = self.__domServer.timerplans
                     activeplan = self.__domServer.setting.get_value("ActiveTimerPlan")
@@ -429,6 +413,7 @@ class BasePlugin:
 
                     j = json.load(jsn)
                     zoneId = j["zone"]
+                    Domoticz.Log(str(zoneId))
                     newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self)
 
                     self.saveUserVar()

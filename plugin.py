@@ -227,14 +227,14 @@ class BasePlugin:
             Domoticz.Error("The number of Heating Switches doesn't match the number of Zones")
 
         #delete if too many devices or wrong device type
-        for i in range(len(Devices) - 1, 0, -1) :
-            Domoticz.Log(str(i))
-            if i > len(zoneNames) * 2 :
-                Devices[i].Delete()
-            elif i % 2 == 1 and Devices[i].Type != 242 :
-                Devices[i].Delete()
-            elif i % 2 == 0 and Devices[i].Type != 244 :
-                Devices[i].Delete()
+        # for i in range(len(Devices) - 1, 0, -1) :
+        #     Domoticz.Log(str(i))
+        #     if i > len(zoneNames) * 2 :
+        #         Devices[i].Delete()
+        #     elif i % 2 == 1 and Devices[i].Type != 242 :
+        #         Devices[i].Delete()
+        #     elif i % 2 == 0 and Devices[i].Type != 244 :
+        #         Devices[i].Delete()
 
         optionsModeZone = {"LevelActions": "||",
                        "LevelNames": "Off|Normal|Economy",

@@ -228,8 +228,7 @@ class BasePlugin:
 
         #delete if too many devices or wrong device type
         for i in range(len(Devices) - 1, 0, -1) :
-            Domoticz.Log(str(i))
-            if i >= len(zoneNames) * 2 :
+            if i > len(zoneNames) * 2 :
                 Devices[i].Delete()
             elif i % 2 == 1 and Devices[i].Type != 242 :
                 Devices[i].Delete()
@@ -364,12 +363,13 @@ class BasePlugin:
                                     "Data": timerplans})               
 
                 elif path == '/zones.json':
-                    listZones = []
+                    zones = "[ "
+                    sep = ""
                     for i,zone in enumerate(self.zones) :
-                        listZones.append(ZoneForJson(zone.name,i))
-                    Domoticz.Log("List zones : {}".format(listZones))
+                        zones = zones + sep + "{\"Name\": \"" + zone.name + "\", \"idx\": " + str(i) + " }"
+                        sep = ", "
+                    zones = zones + " ]"
 
-                    zones = json.dumps(listZones)
                     Domoticz.Log("List zones json : {}".format(zones))
                     # zones = "[ {'Name': 'Cuisine', 'idx': 0 }, {'Name': 'Salon', 'idx': 1 }, {'Name': 'Chambre', 'idx': 2 } ]".replace("'", "\"")
                             

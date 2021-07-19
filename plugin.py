@@ -237,8 +237,7 @@ class BasePlugin:
                 Devices[i].Delete()
 
         optionsModeZone = {"LevelActions": "||",
-                       "LevelNames": "Off|Normal|Economy",
-                       "LevelOffHidden": "true",
+                       "LevelNames": "Off|Normal|Holiday",
                        "SelectorStyle": "0"}
 
         self.__thermostat = []

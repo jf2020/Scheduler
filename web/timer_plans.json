@@ -1,0 +1,14 @@
+[
+    {
+        "Active": true,
+        "Name": "Normal",
+        "idx": 1,
+        "isactive": "true"
+    },
+    {
+        "Active": false,
+        "Name": "Vacances",
+        "idx": 2,
+        "isactive": "false"
+    }
+]

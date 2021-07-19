@@ -332,7 +332,21 @@ class BasePlugin:
                                                 "Pragma": "no-cache",
                                                 "Expires": "0"},
                                     "Data": timerplans})               
-    
+
+                elif path == '/zones.json':
+
+                    zones = "{ [ {'Name': 'Cuisine', 'idx': 1 }, {'Name': 'Salon', 'idx': 2 }, {'Name': 'Chambre', 'idx': 3 }]".replace("'", "\"")
+                            
+                    Connection.Send({"Status":"200", 
+                                    "Headers": {"Connection": "keep-alive", 
+                                                "Accept-Encoding": "gzip, deflate",
+                                                "Access-Control-Allow-Origin":"http://" + Parameters['Address'] + ":" + Parameters['Port'] + "",
+                                                "Cache-Control": "no-cache, no-store, must-revalidate",
+                                                "Content-Type": "application/json; charset=UTF-8",
+                                                "Content-Length":""+str(len(zones))+"",
+                                                "Pragma": "no-cache",
+                                                "Expires": "0"},
+                                    "Data": zones})     
 
                 elif (return_type == 'text/html' or return_type == 'text/css' or return_type == 'text/plain'):
                     data = Utils.readFile(filePath, False)
@@ -393,9 +407,27 @@ class BasePlugin:
                                                          
                     self.__domServer.setting.set_value("ActiveTimerPlan", j["activetimerplan"])
                                       
-                data = "{\"status\":\"OK\"}"
+                    data = "{\"status\":\"OK\"}"
  
-                Connection.Send({"Status":"200", 
+                    Connection.Send({"Status":"200", 
+                                "Headers": {"Connection": "keep-alive", 
+                                            "Accept-Encoding": "gzip, deflate",
+                                            "Access-Control-Allow-Origin":"http://" + Parameters['Address'] + ":" + Parameters['Port'] + "",
+                                            "Cache-Control": "no-cache, no-store, must-revalidate",
+                                            "Content-Type": "application/json; charset=UTF-8",
+                                            "Content-Length":""+str(len(data))+"",
+                                            "Pragma": "no-cache",
+                                            "Expires": "0"},
+                                "Data": data})
+
+                elif (path == "/getschedule"):
+                    
+                    j = json.loads(jsn)
+
+                    timers = dom.SetPointTimer.loadbythermostat(self.__thermostat[j["zone"]])
+                    data = str(TimersToJson(timers, self.Internals['ComfortTemp'], self.Internals['EcoTemp'],self.Internals['NightTemp'])).replace("'", "\"")
+                                                         
+                    Connection.Send({"Status":"200", 
                                 "Headers": {"Connection": "keep-alive", 
                                             "Accept-Encoding": "gzip, deflate",
                                             "Access-Control-Allow-Origin":"http://" + Parameters['Address'] + ":" + Parameters['Port'] + "",

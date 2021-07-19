@@ -243,12 +243,12 @@ class BasePlugin:
 
         self.__thermostat = []
         for i, name in enumerate(zoneNames, start = 1):  # default start at 0, need 1
-            unitId = i*2 -1
+            unitId = i*2 - 1
             if unitId not in Devices :
                 Domoticz.Device(Name=name, Unit=unitId, Type=242, Subtype=1, Used=1).Create()
                 Devices[unitId].Update(nValue=0, sValue=str(self.Internals["EcoTemp"]), Name = name)
             else :
-                dev = Devices[i]
+                dev = Devices[unitId]
                 dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = name)
 
             unitId = i*2

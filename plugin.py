@@ -82,12 +82,21 @@ import magic
 #pip3 install accept-types
 from accept_types import get_best_match
 
+class zoneData:
+
+    def __init__(self, device, idxTemp, idxSwitch):
+        self.device = device
+        self.idxTemp = idxTemp
+        self.idxSwitch = idxSwitch
+
+
 class BasePlugin:
     enabled = False
         
     httpServerConn = None
     httpServerConns = {}
     domServer = None
+    zoneDatas = []
     
     
     def __init__(self):
@@ -170,6 +179,11 @@ class BasePlugin:
 
 
         zones = Parameters["Mode2"].split(",")
+        idxTemp = Parameters["Mode3"].split(",")
+        idxSwitches = Parameters["Mode4"].split(",")
+
+        if len(zones) != len(idxTemp) or len(zones) != len(idxSwitches) :
+            Domoticz.Error("Number of Inside Temperature Sensors or number of Heating Switches don't match number of Zones")
 
         #delete
         for i in Devices :
@@ -195,9 +209,9 @@ class BasePlugin:
 
         Domoticz.Log("Domoticz-API server is: " + str(self.__domServer))
 
-
         Domoticz.Log("Leaving on start")
-        
+
+
     def onStop(self):
         LogMessage("onStop called")
         Utils.deleteFile(self.__filename)
@@ -519,21 +533,21 @@ def JsonToTimers(device, data, plugin):
     
     return timers
 
-def parseCSV(strCSV):
-    listvals = []
-    i=0
-    for value in strCSV.split(","):
-        try:
-            if i == 5:
-                val = float(value)
-            else:
-                val = int(value)
-        except:
-            pass
-        else:
-            listvals.append(val)
-        i+=1
-    return listvals
+# def parseCSV(strCSV):
+#     listvals = []
+#     i=0
+#     for value in strCSV.split(","):
+#         try:
+#             if i == 5:
+#                 val = float(value)
+#             else:
+#                 val = int(value)
+#         except:
+#             pass
+#         else:
+#             listvals.append(val)
+#         i+=1
+#     return listvals
 
 def DomoticzAPICall(APICall):
 

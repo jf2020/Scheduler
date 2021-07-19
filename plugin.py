@@ -411,7 +411,7 @@ class BasePlugin:
                               
                 if (path == "/save"):
 
-                    j = json.load(jsn)
+                    j = json.loads(jsn)
                     zoneId = j["zone"]
                     Domoticz.Log(str(zoneId))
                     newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self)

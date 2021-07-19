@@ -337,7 +337,7 @@ class BasePlugin:
 
                 elif path == '/zones.json':
 
-                    zones = "{ [ {'Name': 'Cuisine', 'idx': 1 }, {'Name': 'Salon', 'idx': 2 }, {'Name': 'Chambre', 'idx': 3 } ] }".replace("'", "\"")
+                    zones = "{ [ {'Name': 'Cuisine', 'idx': 0 }, {'Name': 'Salon', 'idx': 1 }, {'Name': 'Chambre', 'idx': 2 } ] }".replace("'", "\"")
                             
                     Connection.Send({"Status":"200", 
                                     "Headers": {"Connection": "keep-alive", 

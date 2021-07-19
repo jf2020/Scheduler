@@ -92,7 +92,7 @@
 						//debugger;
 						changeTimerPlan($('#schedule-select').find(":selected").val())
 
-						reloadSchedule();
+						reloadSchedule($('#zone-select').find(":selected").val());
 					});
 
 				});
@@ -166,10 +166,10 @@
 					}
 				}
 
-			};
+			}
 
 			loadZones();
-			reloadSchedule($('#zone-select').find(":selected").val());
+			reloadSchedule(0);
 
 
 			saveSchedule = function () {
@@ -215,7 +215,7 @@
 						//wait 1 second
 						setTimeout(function () {
 							HideNotify();
-							reloadSchedule();
+							reloadSchedule($('#zone-select').find(":selected").val());
 						}, 1000);
 					},
 					error: function (jqxhr, status, error) {
@@ -430,7 +430,7 @@
 		<p align="center" style="width:500px;padding:10px;">
 			<input type="submit" class="btn btn-danger" value="Cancel" onclick="window.location = '/';" />
 			<input type="submit" class="btn btn-primary" value="Save Schedule" onclick="saveSchedule();" />
-			<input type="submit" class="btn btn-link" value="Reload" onclick="reloadSchedule();" />
+			<input type="submit" class="btn btn-link" value="Reload" onclick="reloadSchedule($('#zone-select').find(':selected').val());" />
 		</p>
 
 

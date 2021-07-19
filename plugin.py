@@ -202,8 +202,8 @@ class BasePlugin:
             self.__thermostat.append(dom.Device(self.__domServer, Devices[i].ID))
             self.zoneDatas.append(zoneData(Devices[i],idxTemp[i-1],idxSwitches[i-1]))
 
-        for zoneData in self.zoneDatas :
-            Domoticz.Log("Zone : {}, idxTemp : {}, idxSwitch : {}".format(zoneData.device,zoneData.idxTemp,zoneData.idxSwitch))
+        for zone in self.zoneDatas :
+            Domoticz.Log("Zone : {}, idxTemp : {}, idxSwitch : {}".format(zone.device,zone.idxTemp,zone.idxSwitch))
 
         # if (len(Devices) == 0):
         #     Domoticz.Device(Name=Parameters['Name'], Unit=1, Type=242, Subtype=1, Used=1).Create()

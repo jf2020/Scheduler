@@ -227,7 +227,7 @@ class BasePlugin:
             Domoticz.Error("The number of Heating Switches doesn't match the number of Zones")
 
         #delete if too many devices or wrong device type
-        for i in Devices :
+        for i in range(len(Devices)) :
             if i > len(zoneNames) * 2 :
                 Devices[i].Delete()
             elif i % 2 == 1 and Devices[i].Type != 242 :

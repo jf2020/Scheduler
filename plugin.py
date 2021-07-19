@@ -264,7 +264,7 @@ class BasePlugin:
             modeSelector = dom.Device(self.__domServer, Devices[i*2].ID)
             self.__thermostat.append(thermostat)
 
-            self.zones.append(Zone(Devices[i].Name,\
+            self.zones.append(Zone(name,\
                                    thermostat, \
                                    modeSelector, \
                                    dom.Device(self.__domServer, idxTemps[i-1]),\

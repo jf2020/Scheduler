@@ -100,7 +100,8 @@ class Zone:
         return float(self.thermostat.get_value("SetPoint"))
 
     def __setSwitchState(self, state):
-        return self.switch.set_value("Status", state)
+        DomoticzAPICall("type=command&param=switchlight&idx={}&switchcmd={}".format(self.switch.get_value("idx"),state))
+        # self.switch.set_value("Status", state)
 
     def process(self):
         temp = self.__getTemp()
@@ -114,6 +115,7 @@ class Zone:
         if newState != state :
             Domoticz.Log("Zone {} change status, new status".format(self.name, newState))
             self.__setSwitchState(newState)
+
 
 
 

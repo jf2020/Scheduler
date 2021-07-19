@@ -203,8 +203,10 @@ class BasePlugin:
         html = html.replace(' href="/', ' href="http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/')
         html = html.replace('"../thermostat_schedule.json"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/thermostat_schedule.json"')
         html = html.replace('"../timer_plans.json"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/timer_plans.json"')
-        html = html.replace('"save"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/save"')
-        html = html.replace('"changetimerplan"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/changetimerplan"')
+        html = html.replace('"../zones.json"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/zones.json"')
+        html = html.replace('"/save"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/save"')
+        html = html.replace('"/changetimerplan"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/changetimerplan"')
+        html = html.replace('"/getschedule"', '"http://' + Parameters['Address'] + ':' + Parameters['Mode1'] + '/getschedule"')
 
 
         zoneNames = Parameters["Mode2"].split(",")

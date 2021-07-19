@@ -101,7 +101,7 @@
 				active_zone["zone"] = idx;
 
 				$.ajax({
-					url: "getschedule",
+					url: "/getschedule",
 					data: JSON.stringify(active_zone, null, 4),
 					contentType: 'application/json',
 					async: false,
@@ -201,7 +201,7 @@
 				ShowNotify($.t('Saving schedule') + ' ');
 
 				$.ajax({
-					url: "save",
+					url: "/save",
 					data: JSON.stringify(sched_json, null, 4),
 					contentType: 'application/json',
 					async: false,
@@ -234,7 +234,7 @@
 				active_timer["activetimerplan"] = idx;
 
 				$.ajax({
-					url: "changetimerplan",
+					url: "/changetimerplan",
 					data: JSON.stringify(active_timer, null, 4),
 					contentType: 'application/json',
 					async: false,

@@ -106,11 +106,13 @@ class Zone:
         temp = self.__getTemp()
         state = self.__getSwitchState()
         setPoint = self.__getSetPoint()
-#        Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
+        Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
         newState = "Off"
         if temp < setPoint :
+            Domoticz.Log("Zone {} must heat".format(self.name))
             newState = "On"
         if newState != state :
+            Domoticz.Log("Zone {} change status, new status".format(self.name, newState))
             self.__setSwitchState(newState)
 
 

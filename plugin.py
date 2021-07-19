@@ -106,8 +106,12 @@ class Zone:
         temp = self.__getTemp()
         state = self.__getSwitchState()
         setPoint = self.__getSetPoint()
-        Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
-        return
+#        Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
+        newState = "Off"
+        if temp < setPoint :
+            newState = "On"
+        if newState != state :
+            self.__setSwitchState(newState)
 
 
 
@@ -219,7 +223,7 @@ class BasePlugin:
                 Domoticz.Device(Name=name, Unit=i, Type=242, Subtype=1, Used=1).Create()
                 Devices[i].Update(nValue=0, sValue=str(self.Internals["EcoTemp"]), Name = name)
             else :
-                dev = Devices[i]
+                dev = Devices[i]x
                 dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = name)
 
             thermostat = dom.Device(self.__domServer, Devices[i].ID)

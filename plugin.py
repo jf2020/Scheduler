@@ -425,6 +425,7 @@ class BasePlugin:
                 elif (path == "/getschedule"):
                     
                     j = json.loads(jsn)
+                    Domoticz.Log("json : {}".format(j))
 
                     timers = dom.SetPointTimer.loadbythermostat(self.__thermostat[j["zone"]])
                     data = str(TimersToJson(timers, self.Internals['ComfortTemp'], self.Internals['EcoTemp'],self.Internals['NightTemp'])).replace("'", "\"")

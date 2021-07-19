@@ -631,6 +631,8 @@ def JsonToTimers(device, data, plugin):
     plan = json.loads(data)
     timers = []
     for day in plan:
+        if day == "zone":
+            continue
         if day == "temps":
             plugin.Internals['ComfortTemp'] = plan[day]["C"]
             plugin.Internals['EcoTemp'] = plan[day]["E"]

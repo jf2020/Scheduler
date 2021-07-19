@@ -84,8 +84,9 @@ from accept_types import get_best_match
 
 class zoneData:
 
-    def __init__(self, device, idxTemp, idxSwitch):
-        self.device = device
+    def __init__(self, name, thermostat, idxTemp, idxSwitch):
+        self.name = name
+        self.thermostat = thermostat
         self.idxTemp = idxTemp
         self.idxSwitch = idxSwitch
 
@@ -199,11 +200,15 @@ class BasePlugin:
                 dev = Devices[i]
                 dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = zone)
 
-            self.__thermostat.append(dom.Device(self.__domServer, Devices[i].ID))
-            self.zoneDatas.append(zoneData(Devices[i],idxTemp[i-1],idxSwitches[i-1]))
+            thermostat = dom.Device(self.__domServer, Devices[i].ID)
+            self.__thermostat.append(thermostat)
+            self.zoneDatas.append(zoneData(Devices[i].Name, thermostat, idxTemp[i-1], idxSwitches[i-1]))
 
         for zone in self.zoneDatas :
-            Domoticz.Log("Zone : {}, setPoint : {}, idxTemp : {}, idxSwitch : {}".format(zone.device.Name,zone.device.SetPoint,zone.idxTemp,zone.idxSwitch))
+            Domoticz.Log("Zone : {}, setPoint : {}, idxTemp : {}, idxSwitch : {}".format(zone.name,\
+                                                                                         zone.thermostat.get_value("SetPoint"),\
+                                                                                         zone.idxTemp,\
+                                                                                         zone.idxSwitch))
 
         # if (len(Devices) == 0):
         #     Domoticz.Device(Name=Parameters['Name'], Unit=1, Type=242, Subtype=1, Used=1).Create()

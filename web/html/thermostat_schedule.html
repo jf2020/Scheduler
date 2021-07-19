@@ -54,11 +54,8 @@
 							value: data[i].idx,
 							text: data[i].Name
 						}));
-
-						if (data[i].isactive == "true") {
-							$('#schedule-select').val(data[i].idx);
-						}
 					}
+					$('#zone-select').val(data[0].idx);
 
 					$('#zone-select').on('change', function () {
 

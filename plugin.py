@@ -220,7 +220,7 @@ class BasePlugin:
         idxSwitches = Parameters["Mode4"].split(",")
 
         if len(zoneNames) == 0 :
-            Domoticz.Error("At least one zone meust be defined!")
+            Domoticz.Error("At least one zone must be defined!")
         if len(zoneNames) != len(idxTemps) :
             Domoticz.Error("The number of Inside Temperature Sensors doesn't match the number of Zones")
         if len(zoneNames) != len(idxSwitches) :
@@ -253,7 +253,7 @@ class BasePlugin:
 
             unitId = i*2
             if unitId not in Devices :
-                Domoticz.Device(Name=name, Unit=unitId,  TypeName="Selector Switch", Switchtype=18, Image=15, Options=optionsModeZone, Used=1).Create()
+                Domoticz.Device(Name="Mode" + name, Unit=unitId,  TypeName="Selector Switch", Switchtype=18, Image=15, Options=optionsModeZone, Used=1).Create()
                 Devices[unitId].Update(nValue=0, sValue="10", Name = "Mode " + name)  # mode normal by default
             else :
                 dev = Devices[unitId]

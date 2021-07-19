@@ -345,7 +345,7 @@ class BasePlugin:
                     for i,zone in enumerate(self.zones) :
                         list.append(Zone.forJson(zone.name,i))
 
-                    zones = json.dumps(list)
+                    zones = json.dumps(list).replace("'", "\"")
 
                     # zones = "[ {'Name': 'Cuisine', 'idx': 0 }, {'Name': 'Salon', 'idx': 1 }, {'Name': 'Chambre', 'idx': 2 } ]".replace("'", "\"")
                             

@@ -203,7 +203,7 @@ class BasePlugin:
             self.zoneDatas.append(zoneData(Devices[i],idxTemp[i-1],idxSwitches[i-1]))
 
         for zone in self.zoneDatas :
-            Domoticz.Log("Zone : {}, idxTemp : {}, idxSwitch : {}".format(zone.device,zone.idxTemp,zone.idxSwitch))
+            Domoticz.Log("Zone : {}, setPoint : {}, idxTemp : {}, idxSwitch : {}".format(zone.device.Name,zone.device.SetPoint,zone.idxTemp,zone.idxSwitch))
 
         # if (len(Devices) == 0):
         #     Domoticz.Device(Name=Parameters['Name'], Unit=1, Type=242, Subtype=1, Used=1).Create()
@@ -395,6 +395,7 @@ class BasePlugin:
             return
         
         self.__thermostat[0].set_value("setpoint", Level)
+
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):
         Domoticz.Log("Notification: " + Name + "," + Subject + "," + Text + "," + Status + "," + str(Priority) + "," + Sound + "," + ImageFile)

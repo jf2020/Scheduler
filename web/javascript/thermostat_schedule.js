@@ -436,7 +436,7 @@ ScheduleSlider.prototype.drawDecorators = function (ctx) {
 
     xPos += xInc;
   }
-  ctx.drawImage(this.ss.iconActions, this.width - 49, this.height -17, 48, 16);
+  ctx.drawImage(this.iconActions, this.width - 49, this.height -17, 48, 16);
 }
 
 // set the selected entry

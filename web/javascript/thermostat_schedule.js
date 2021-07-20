@@ -10,9 +10,10 @@ function ScheduleEntry(hhmm, temp, ss) {
   this.ss = ss;
   this.hhmm = hhmm;
   this.temp = temp;
-  this.y = this.ss.imgY;
-
-  this.x = this.xFromHHMM(hhmm);
+  if (ss) {
+    this.y = this.ss.imgY;
+    this.x = this.xFromHHMM(hhmm);
+  }
 }
 
 

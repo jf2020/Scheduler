@@ -434,10 +434,11 @@ class BasePlugin:
                     e = self.Internals['EcoTemp']
                     n = self.Internals['NightTemp']
                     temps = thermostat.description.split(";")
+                    Domoticz.Log("List temps: {}".format(temps))
                     if (len(temps) == 3) :
                         try :
                             lFloat = list(map(float,temps))
-                            Domoticz.Log("List temp: {}".format(lFloat))
+                            Domoticz.Log("List lFllat: {}".format(lFloat))
                             c = lFloat[0]
                             e = lFloat[1]
                             n = lFloat[2]

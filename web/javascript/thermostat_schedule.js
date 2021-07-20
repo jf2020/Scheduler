@@ -305,7 +305,12 @@ ScheduleSlider.prototype.getColor = function (temp) {
 
 ScheduleSlider.prototype.handleClick = function (e) {
   var mouse = this.getMouse(e);
-  if (mouse.x < 15  && mouse.x > 5) alert ("move up")
+  if (mouse.y > 15) return;
+  var px = this.width - mouse.x
+  if (px < 1 || px > 48) return;
+  if (px < 16) alert("Copy");
+  else if (px < 32) alert("Paste")
+  else alert("Clear")
 }
 
 ScheduleSlider.prototype.handleDoubleClick = function (e) {
@@ -436,7 +441,7 @@ ScheduleSlider.prototype.drawDecorators = function (ctx) {
 
     xPos += xInc;
   }
-  ctx.drawImage(this.iconActions, this.width - 49, this.height -17, 48, 16);
+  ctx.drawImage(this.iconActions, this.width - 49, 1, 48, 16);
 }
 
 // set the selected entry

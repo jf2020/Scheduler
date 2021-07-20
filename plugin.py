@@ -413,10 +413,7 @@ class BasePlugin:
 
                     j = json.loads(jsn)
                     zoneId = int(j["zone"])
-                    newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self, Devices[zoneId * 2 + 1])
-
-                    self.saveUserVar()
-                    
+                    newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self, Devices[zoneId * 2 + 1])         
                     oldtimers = dom.SetPointTimer.loadbythermostat(self.__thermostat[zoneId])
                     
                     for oldtimer in oldtimers:

@@ -136,7 +136,7 @@ class Zone:
         if  _modeChauffage.get_value("Level") == HeatingMode.COMFORT.value or \
             _modeChauffage.get_value("Level") == HeatingMode.HOLIDAY.value or \
             modeZone == ZoneMode.HOLIDAY.value :
-            schedule = _plugin.scheduleData(self.thermostat)
+            schedule = json.load(_plugin.scheduleData(self.thermostat))
             if _modeChauffage.get_value("Level") == HeatingMode.COMFORT.value :
                 setPoint = schedule["temps"]["C"]
             else :

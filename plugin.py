@@ -413,7 +413,7 @@ class BasePlugin:
 
                     j = json.loads(jsn)
                     zoneId = int(j["zone"])
-                    newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self, zoneId * 2 + 1)
+                    newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self, Devices[zoneId * 2 + 1])
 
                     self.saveUserVar()
                     
@@ -626,14 +626,14 @@ def TimersToJson(timers, c, e, n):
                 tmrdict["sunday"].append([f"{timer.hour:02d}:{timer.minute:02d}", timer.temperature ])   
     return tmrdict
         
-def JsonToTimers(device, data, plugin, id):
+def JsonToTimers(device, data, plugin, pluginDevice):
     plan = json.loads(data)
     timers = []
     for day in plan:
         if day == "zone":
             continue
         if day == "temps":
-            Devices[id].Update(nValue=device.nValue, sValue=device.sValue, Description = str(plan[day]))
+            pluginDevice.Update(nValue=pluginDevice.nValue, sValue=pluginDevice.sValue, Description = str(plan[day]))
             plugin.Internals['ComfortTemp'] = plan[day]["C"]
             plugin.Internals['EcoTemp'] = plan[day]["E"]
             plugin.Internals['NightTemp'] = plan[day]["N"]

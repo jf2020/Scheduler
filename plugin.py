@@ -433,7 +433,8 @@ class BasePlugin:
                     c = self.Internals['ComfortTemp']
                     e = self.Internals['EcoTemp']
                     n = self.Internals['NightTemp']
-                    description = thermostat.get_value("Description")
+                    # description = thermostat.get_value("Description")
+                    description = thermostat.description
                     Domoticz.Log("Thermostat description: {}".format(description))
 
                     temps = description.split(";")

@@ -484,7 +484,7 @@ class BasePlugin:
                     
                     for oldtimer in oldtimers:
                         if (oldtimer.timertype is dom.TimerTypes.TME_TYPE_ON_TIME):
-                            oldtimer.dele   te()
+                            oldtimer.delete()
                             
                     for newtimer in newtimers:
                         newtimer.add()

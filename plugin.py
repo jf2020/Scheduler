@@ -440,8 +440,8 @@ class BasePlugin:
                             c = lFloat[0]
                             e = lFloat[1]
                             n = lFloat[2]
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            Domoticz.Log("Err convertir float: {}".format(e))
 
                     data = str(TimersToJson(timers, c, e, n)).replace("'", "\"")
                                                          

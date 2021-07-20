@@ -308,9 +308,14 @@ ScheduleSlider.prototype.handleClick = function (e) {
   if (mouse.y > 15) return;
   var px = this.width - mouse.x
   if (px < 1 || px > 48) return;
-  if (px < 16) alert("Copy");
+  if (px < 16) {
+    // Clear
+    alert("Clear");
+    this.entries.length = 0;
+    this.valid = false;
+  } 
   else if (px < 32) alert("Paste")
-  else alert("Clear")
+  else alert("Copy")
 }
 
 ScheduleSlider.prototype.handleDoubleClick = function (e) {

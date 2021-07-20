@@ -408,10 +408,7 @@ class BasePlugin:
 
                     j = json.loads(jsn)
                     zoneId = int(j["zone"])
-                    newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self)
-
-                    self.saveUserVar()
-                    
+                    newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self, Devices[zoneId * 2 + 1])         
                     oldtimers = dom.SetPointTimer.loadbythermostat(self.__thermostat[zoneId])
                     
                     for oldtimer in oldtimers:
@@ -430,8 +427,23 @@ class BasePlugin:
                 elif (path == "/getschedule"):
                     
                     j = json.loads(jsn)
-                    timers = dom.SetPointTimer.loadbythermostat(self.__thermostat[j["zone"]])
-                    data = str(TimersToJson(timers, self.Internals['ComfortTemp'], self.Internals['EcoTemp'],self.Internals['NightTemp'])).replace("'", "\"")
+                    zoneId = j["zone"]
+                    thermostat = self.__thermostat[zoneId]
+                    timers = dom.SetPointTimer.loadbythermostat(thermostat)
+                    c = self.Internals['ComfortTemp']
+                    e = self.Internals['EcoTemp']
+                    n = self.Internals['NightTemp']
+                    temps = thermostat.description.split(";")
+                    if (len(temps) == 3) :
+                        try :
+                            lFloat = list(map(float,temps))
+                            c = lFloat[0]
+                            e = lFloat[1]
+                            n = lFloat[2]
+                        except Exception:
+                            pass
+
+                    data = str(TimersToJson(timers, c, e, n)).replace("'", "\"")
                                                          
                     Connection.Send({"Status":"200", 
                                 "Headers": {"Connection": "keep-alive", 
@@ -621,17 +633,15 @@ def TimersToJson(timers, c, e, n):
                 tmrdict["sunday"].append([f"{timer.hour:02d}:{timer.minute:02d}", timer.temperature ])   
     return tmrdict
         
-def JsonToTimers(device, data, plugin):
+def JsonToTimers(device, data, plugin, pluginDevice):
     plan = json.loads(data)
     timers = []
     for day in plan:
         if day == "zone":
             continue
         if day == "temps":
-            device.Update(nValue=device.nValue, sValue=device.sValue, Description = str(plan[day]))
-            plugin.Internals['ComfortTemp'] = plan[day]["C"]
-            plugin.Internals['EcoTemp'] = plan[day]["E"]
-            plugin.Internals['NightTemp'] = plan[day]["N"]
+            Domoticz.Log(str(plan[day]))
+            pluginDevice.Update(nValue=pluginDevice.nValue, sValue=pluginDevice.sValue, Description=str(plan[day]["C"]) + ";" + str(plan[day]["E"]) + ";" + str(plan[day]["N"]))
             continue 
         timerday = dom.TimerDays[day.capitalize()]
         for tmr in plan[day]:

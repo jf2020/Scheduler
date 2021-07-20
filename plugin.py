@@ -531,7 +531,7 @@ class BasePlugin:
         else:
             idxTh = Unit // 2 - 1
             currentValue = self.__thermostat[idxTh].get_value("SetPoint")
-            if (str(currentValue) == str(Level)):
+            if (abs(float(currentValue) - float(Level)) < 0.001):
                 return
             self.__thermostat[idxTh].set_value("setpoint", Level)
 

@@ -65,6 +65,7 @@ import json
 import base64
 from urllib import parse, request
 from utils import Utils
+from enum import *
 
 # sudo pip3 install git+git://github.com/ArtBern/Domoticz-API.git -t /usr/lib/python3.5 --upgrade
 import DomoticzAPI as dom
@@ -117,6 +118,17 @@ class Zone:
         if newState != state :
             Domoticz.Log("Zone {} now {}".format(self.name, newState))
             self.__setSwitchState(newState)
+
+class ZoneMode(Enum):
+    OFF = 0
+    NORMAL = 10
+    HOLIDAY = 20
+
+class HeatingMode(Enum):
+    OFF = 0
+    AUTO = 10
+    COMFORT = 20
+    HOLIDAY = 30
 
 
 class BasePlugin:
@@ -222,41 +234,50 @@ class BasePlugin:
             Domoticz.Error("The number of Heating Switches doesn't match the number of Zones")
 
         #delete if too many devices or wrong device type
-        # for i in range(len(Devices) - 1, 0, -1) :
-        #     Devices[i].Delete()
-
         for i in range(len(Devices) - 1, 0, -1) :
-            if i > len(zoneNames) * 2 :
-                Devices[i].Delete()
-            elif i % 2 == 1 and Devices[i].Type != 242 :
-                Devices[i].Delete()
-            elif i % 2 == 0 and Devices[i].Type != 244 :
-                Devices[i].Delete()
+            Devices[i].Delete()
 
-        optionsModeZone = {"LevelActions": "||",
-                       "LevelNames": "Off|Normal|Holiday",
-                       "SelectorStyle": "0"}
+        # for i in range(len(Devices) - 1, 0, -1) :
+        #     if i > len(zoneNames) * 2 :
+        #         Devices[i].Delete()
+        #     elif i % 2 == 1 and Devices[i].Type != 242 :
+        #         Devices[i].Delete()
+        #     elif i % 2 == 0 and Devices[i].Type != 244 :
+        #         Devices[i].Delete()
+
+        optionsModeChauffage = {"LevelActions": "|||",\
+                                "LevelNames": "Off|Auto|Comfort|Holiday",\
+                                "SelectorStyle": "0"}
+        if 1 not in Devices:
+            Domoticz.Device(Name="Mode Chauffage", Unit=1, TypeName="Selector Switch", Switchtype=18, Image=15,
+                            Options=optionsModeChauffage, Used=1).Create()
+            Devices[1].Update(nValue=1, sValue="10", Name="Mode Chauffage")  # mode Auto by default
+
+
+        optionsModeZone = {"LevelActions": "||",\
+                           "LevelNames": "Off|Normal|Holiday",\
+                           "SelectorStyle": "0"}
 
         self.__thermostat = []
         for i, name in enumerate(zoneNames, start = 1):  # default start at 0, need 1
-            unitId = i*2 - 1
-            if unitId not in Devices :
-                Domoticz.Device(Name=name, Unit=unitId, Type=242, Subtype=1, Used=1).Create()
-                Devices[unitId].Update(nValue=0, sValue=str(self.Internals["EcoTemp"]), Name = name)
+            unitIdTh = i*2
+            if unitIdTh not in Devices :
+                Domoticz.Device(Name=name, Unit=unitIdTh, Type=242, Subtype=1, Used=1).Create()
+                Devices[unitIdTh].Update(nValue=0, sValue=str(self.Internals["EcoTemp"]), Name = name)
             else :
-                dev = Devices[unitId]
+                dev = Devices[unitIdTh]
                 dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = name)
 
-            unitId = i*2
-            if unitId not in Devices :
-                Domoticz.Device(Name="Mode" + name, Unit=unitId,  TypeName="Selector Switch", Switchtype=18, Image=15, Options=optionsModeZone, Used=1).Create()
-                Devices[unitId].Update(nValue=1, sValue="10", Name = "Mode " + name)  # mode normal by default
+            unitIdMode = i*2 + 1
+            if unitIdMode not in Devices :
+                Domoticz.Device(Name="Mode" + name, Unit=unitIdMode,  TypeName="Selector Switch", Switchtype=18, Image=15, Options=optionsModeZone, Used=1).Create()
+                Devices[unitIdMode].Update(nValue=1, sValue="10", Name = "Mode " + name)  # mode normal by default
             else :
-                dev = Devices[unitId]
+                dev = Devices[unitIdMode]
                 dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = "Mode " + name)
 
-            thermostat = dom.Device(self.__domServer, Devices[i*2-1].ID)
-            modeSelector = dom.Device(self.__domServer, Devices[i*2].ID)
+            thermostat = dom.Device(self.__domServer, Devices[unitIdTh].ID)
+            modeSelector = dom.Device(self.__domServer, Devices[unitIdMode].ID)
             self.__thermostat.append(thermostat)
 
             self.zones.append(Zone(name,\
@@ -408,7 +429,7 @@ class BasePlugin:
 
                     j = json.loads(jsn)
                     zoneId = int(j["zone"])
-                    newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self, Devices[zoneId * 2 + 1])         
+                    newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self, Devices[(zoneId+1) * 2])
                     oldtimers = dom.SetPointTimer.loadbythermostat(self.__thermostat[zoneId])
                     
                     for oldtimer in oldtimers:
@@ -490,15 +511,16 @@ class BasePlugin:
     def onCommand(self, Unit, Command, Level, Hue):
         Domoticz.Log("onCommand called for Unit " + str(Unit) + ": Parameter '" + str(Command) + "', Level: " + str(Level))
         
-        if Unit % 2 == 0:  # mode switch
+        if Unit % 2 == 1:  # mode switch ( chauffage ou zone )
             nvalue = 1 if Level > 0 else 0
             svalue = str(Level)
             Devices[Unit].Update(nValue=nvalue, sValue=svalue)
         else:
-            currentValue = self.__thermostat[Unit // 2 + 1].get_value("SetPoint")
+            idxTh = Unit // 2 - 1
+            currentValue = self.__thermostat[idxTh].get_value("SetPoint")
             if (str(currentValue) == str(Level)):
                 return
-            self.__thermostat[0].set_value("setpoint", Level)
+            self.__thermostat[idxTh].set_value("setpoint", Level)
 
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):

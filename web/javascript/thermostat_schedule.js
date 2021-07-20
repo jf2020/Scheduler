@@ -308,9 +308,8 @@ ScheduleSlider.prototype.handleClick = function (e) {
   if (mouse.y > 15) return;
   var px = this.width - mouse.x
   if (px < 1 || px > 48) return;
-  if (px < 16) {
+  if (px < 16 && confirm("Delete all entries for " + this.day + "?")) {
     // Clear
-    alert("Clear");
     this.entries.length = 0;
     this.valid = false;
   } 

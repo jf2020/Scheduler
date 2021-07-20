@@ -318,12 +318,12 @@ ScheduleSlider.prototype.handleClick = function (e) {
   }
   else if (px < 32) {
     if (this.clipboard.length > 0) {
-      this.entries = JSON.parse(JSON.stringify(this.clipboard));
+      this.entries = this.clipboard.map(a => new ScheduleEntry(a.hhm, a.temp, this))
       this.valid = false;
     }
   }
   else {
-    this.clipboard = JSON.parse(JSON.stringify(this.entries));
+    this.clipboard = this.entries.map(a => new ScheduleEntry(a.hhm, a.temp, null));
   }
 }
 

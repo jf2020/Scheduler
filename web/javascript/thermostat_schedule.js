@@ -279,6 +279,10 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
     thisSS.handleDoubleClick(e);
   });
 
+  $(canvas).on('click', function (e) {
+    thisSS.handleClick(e);
+  });
+
   // **** Options! ****
 
   this.selectionColor = '#CC0000';
@@ -296,6 +300,10 @@ ScheduleSlider.prototype.getColor = function (temp) {
   if (temp == "N") return '#465CEA'; //#6a90df
   if (temp == "E") return '#91bfd9';
   return '#d27f41';
+}
+
+ScheduleSlider.prototype.handleClick = function (e) {
+  alert(e);
 }
 
 ScheduleSlider.prototype.handleDoubleClick = function (e) {

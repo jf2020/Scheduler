@@ -634,7 +634,7 @@ def JsonToTimers(device, data, plugin, pluginDevice):
             continue
         if day == "temps":
             Domoticz.Log(str(plan[day]))
-            pluginDevice.Update(nValue=pluginDevice.nValue, sValue=pluginDevice.sValue, Description=str(plan[day]["C"]) + "," + str(plan[day]["E"]) + "," + str(plan[day]["N"]))
+            pluginDevice.Update(nValue=pluginDevice.nValue, sValue=pluginDevice.sValue, Description=str(plan[day]["C"]) + ";" + str(plan[day]["E"]) + ";" + str(plan[day]["N"]))
             plugin.Internals['ComfortTemp'] = plan[day]["C"]
             plugin.Internals['EcoTemp'] = plan[day]["E"]
             plugin.Internals['NightTemp'] = plan[day]["N"]

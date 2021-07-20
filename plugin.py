@@ -66,6 +66,8 @@ import base64
 from urllib import parse, request
 from utils import Utils
 from enum import *
+import datetime as d
+
 
 # sudo pip3 install git+git://github.com/ArtBern/Domoticz-API.git -t /usr/lib/python3.5 --upgrade
 import DomoticzAPI as dom
@@ -83,6 +85,7 @@ import magic
 #pip3 install accept-types
 from accept_types import get_best_match
 
+weekDays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
 class ZoneMode(Enum):
     OFF = 0
@@ -131,16 +134,19 @@ class Zone:
         state = self.__getSwitchState()
         setPoint = self.__getSetPoint()
         modeZone = self.__getModeZone()
-        if _modeChauffage.get_value("Level") == HeatingMode.OFF.value or modeZone == ZoneMode.OFF.value :
+        modeChauffage = _modeChauffage.get_value("Level")
+
+        if modeChauffage == HeatingMode.OFF.value or modeZone == ZoneMode.OFF.value :
             setPoint = 7
-        if  _modeChauffage.get_value("Level") == HeatingMode.COMFORT.value or \
-            _modeChauffage.get_value("Level") == HeatingMode.HOLIDAY.value or \
-            modeZone == ZoneMode.HOLIDAY.value :
+
+        if modeChauffage == HeatingMode.COMFORT.value or \
+           modeChauffage == HeatingMode.HOLIDAY.value or \
+           modeZone == ZoneMode.HOLIDAY.value :
             schedule = json.loads(_plugin.scheduleData(self.thermostat))
-            if _modeChauffage.get_value("Level") == HeatingMode.COMFORT.value :
+            if modeChauffage == HeatingMode.COMFORT.value :
                 setPoint = schedule["temps"]["C"]
-            else :
-                pass
+            else : # HOLIDAY => chauffe comme dimanche
+                setPoint = newSetPoint(schedule["temps"]["N"],schedule[weekDays[0]])
 
         # Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
         newState = "Off"
@@ -472,15 +478,20 @@ class BasePlugin:
 
                     j = json.loads(jsn)
                     zoneId = int(j["zone"])
+
                     newtimers = JsonToTimers(self.__thermostat[zoneId], jsn, self, Devices[(zoneId+1) * 2])
                     oldtimers = dom.SetPointTimer.loadbythermostat(self.__thermostat[zoneId])
                     
                     for oldtimer in oldtimers:
                         if (oldtimer.timertype is dom.TimerTypes.TME_TYPE_ON_TIME):
-                            oldtimer.delete()
+                            oldtimer.dele   te()
                             
                     for newtimer in newtimers:
                         newtimer.add()
+
+                    setPoint = newSetPoint(j["temps"]["N"],j[weekDays[int(d.datetime.today().strftime('%w'))]])
+                    DomoticzAPICall("type=command&param=setsetpoint&idx={}&setpoint={}".\
+                                    format(self.__thermostat[zoneId].get_value("idx"),setPoint))
 
                 elif (path == "/changetimerplan"):
                     
@@ -666,6 +677,15 @@ def onHeartbeat():
     #_plugin.onDeviceModified(Unit)    
 
 # Generic helper functions
+def newSetPoint(nightTemp, comPoints):
+    newSP = nightTemp
+    timeNow = d.datetime.strftime(d.datetime.now(), "%H:%M")
+    for CP in comPoints:
+        if CP[0] <= timeNow :
+            newSP = CP[1]
+    return newSP
+
+
 def TimersToJson(timers, c, e, n):
     tmrdict = { "temps": {"C": c, "E": e,"N": n }, "monday": [], "tuesday": [], "wednesday": [], "thursday": [], "friday" : [], "saturday": [], "sunday": []}
     for timer in timers:

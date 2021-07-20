@@ -490,11 +490,15 @@ class BasePlugin:
     def onCommand(self, Unit, Command, Level, Hue):
         Domoticz.Log("onCommand called for Unit " + str(Unit) + ": Parameter '" + str(Command) + "', Level: " + str(Level))
         
-        currentValue = self.__thermostat[0].get_value("SetPoint")
-        if (str(currentValue) == str(Level)):
-            return
-        
-        self.__thermostat[0].set_value("setpoint", Level)
+        if Unit % 2 == 0:  # mode switch
+            nvalue = 1 if Level > 0 else 0
+            svalue = str(Level)
+            Devices[Unit].Update(nValue=nvalue, sValue=svalue)
+        else:
+            currentValue = self.__thermostat[Unit // 2 + 1].get_value("SetPoint")
+            if (str(currentValue) == str(Level)):
+                return
+            self.__thermostat[0].set_value("setpoint", Level)
 
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):
@@ -649,21 +653,6 @@ def JsonToTimers(device, data, plugin, pluginDevice):
     
     return timers
 
-# def parseCSV(strCSV):
-#     listvals = []
-#     i=0
-#     for value in strCSV.split(","):
-#         try:
-#             if i == 5:
-#                 val = float(value)
-#             else:
-#                 val = int(value)
-#         except:
-#             pass
-#         else:
-#             listvals.append(val)
-#         i+=1
-#     return listvals
 
 def DomoticzAPICall(APICall):
 

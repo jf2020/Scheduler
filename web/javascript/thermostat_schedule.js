@@ -101,10 +101,9 @@ ScheduleEntry.prototype.hhmmFromX = function (x) {
 }
 
 
-function ScheduleSlider(day, canvas, imgref, selref, otherSS, app) {
+function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
   // **** First some setup! ****
 
-  this.app = app;
   this.canvas = canvas;
   this.width = canvas.width;
   this.height = canvas.height;
@@ -318,16 +317,16 @@ ScheduleSlider.prototype.handleClick = function (e) {
     }
   }
   else if (px < 32) {
-    console.log(this.app.clipboard);
-    if (this.app.clipboard.length > 0) {
-      this.entries = this.app.clipboard.map(a => new ScheduleEntry(a.hhmm, a.temp, this))
+    console.log(window.clipboard);
+    if (window.clipboard.length > 0) {
+      this.entries = window.clipboard.map(a => new ScheduleEntry(a.hhmm, a.temp, this))
       console.log(this.entries);
       this.valid = false;
     }
   }
   else {
-    this.app.clipboard = this.entries.map(a => new ScheduleEntry(a.hhmm, a.temp, null));
-    console.log(this.app.clipboard);
+    window.clipboard = this.entries.map(a => new ScheduleEntry(a.hhmm, a.temp, null));
+    console.log(window.clipboard);
   }
 }
 

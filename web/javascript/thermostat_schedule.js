@@ -317,16 +317,13 @@ ScheduleSlider.prototype.handleClick = function (e) {
     }
   }
   else if (px < 32) {
-    console.log(window.clipboard);
     if (window.clipboard.length > 0) {
       this.entries = window.clipboard.map(a => new ScheduleEntry(a.hhmm, a.temp, this))
-      console.log(this.entries);
       this.valid = false;
     }
   }
   else {
     window.clipboard = this.entries.map(a => new ScheduleEntry(a.hhmm, a.temp, null));
-    console.log(window.clipboard);
   }
 }
 

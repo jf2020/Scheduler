@@ -100,9 +100,10 @@ ScheduleEntry.prototype.hhmmFromX = function (x) {
 }
 
 
-function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
+function ScheduleSlider(day, canvas, imgref, selref, otherSS, clipboard) {
   // **** First some setup! ****
 
+  this.clipboard = clipboard;
   this.canvas = canvas;
   this.width = canvas.width;
   this.height = canvas.height;
@@ -207,13 +208,13 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
         if (i == 0) {
           mySel.minX = thisSS.minX;
         }
-        else{
+        else {
           mySel.minX = entries[i - 1].x;
         }
         if (i == entries.length - 1) {
           mySel.maxX = thisSS.maxX + 2;
         }
-        else{
+        else {
           mySel.maxX = entries[i + 1].x;
         }
         thisSS.setSelected(mySel);
@@ -308,13 +309,22 @@ ScheduleSlider.prototype.handleClick = function (e) {
   if (mouse.y > 15) return;
   var px = this.width - mouse.x
   if (px < 1 || px > 48) return;
-  if (px < 16 && confirm("Delete all entries for " + this.day + "?")) {
-    // Clear
-    this.entries.length = 0;
-    this.valid = false;
-  } 
-  else if (px < 32) alert("Paste")
-  else alert("Copy")
+  if (px < 16) {
+    if (this.entries.length > 0 && confirm("Delete all entries for " + this.day + "?")) {
+      // Clear
+      this.entries.length = 0;
+      this.valid = false;
+    }
+  }
+  else if (px < 32) {
+    if (this.clipboard.length > 0) {
+      this.entries = JSON.parse(JSON.stringify(this.clipboard));
+      this.valid = false;
+    }
+  }
+  else {
+    this.clipboard = JSON.parse(JSON.stringify(this.entries));
+  }
 }
 
 ScheduleSlider.prototype.handleDoubleClick = function (e) {
@@ -325,7 +335,7 @@ ScheduleSlider.prototype.handleDoubleClick = function (e) {
   if (this.entries.length == 1) {
     // Add a second entry
     var x = this.se.xFromHHMM('22:00');
-    if (x > newEntry.x){
+    if (x > newEntry.x) {
       this.addScheduleEntry(new ScheduleEntry(this.se.hhmmFromX(x), 'N', this));
     }
   }

@@ -30,6 +30,7 @@
 
 			var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 			var scheduleSliders = [];
+			var clipboard = [];
 
 			$.ajaxSetup({ cache: false });
 
@@ -148,7 +149,7 @@
 
 					$('<br>').appendTo("#canvas");
 
-					var ss = new ScheduleSlider(days[i], canvas, "pointer", "pointer-selected", scheduleSliders);
+					var ss = new ScheduleSlider(days[i], canvas, "pointer", "pointer-selected", scheduleSliders, clipboard);
 
 					scheduleSliders.push(ss);
 

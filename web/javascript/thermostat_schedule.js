@@ -72,7 +72,7 @@ ScheduleEntry.prototype.xFromHHMM = function (hhmm) {
 
   var incr = (hh * 60 + mm) / this.ss.increment;
 
-  var rel = incr / (24 * 6);
+  var rel = incr / (24 * 60 / this.ss.increment);
 
   x = Math.ceil(this.ss.lenX * rel) + this.ss.margin.left - this.ss.imgw / 2;
 
@@ -87,7 +87,7 @@ ScheduleEntry.prototype.hhmmFromX = function (x) {
 
   var normalized = x - this.ss.margin.left + this.ss.imgw / 2;
 
-  var increments = Math.floor(normalized / this.ss.lenX * 24 * 6)
+  var increments = Math.floor(normalized / this.ss.lenX * 24 * 60 / this.ss.increment)
 
   var minutes = increments * this.ss.increment;
 
@@ -128,8 +128,10 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
 
   this.imgY = 33;
 
-  this.increment = 10; 	// minutes
-  this.step = Math.floor(this.lenX / 24 / 6);
+  this.increment = 5; 	// minutes must be a divider of 60
+  // to have a good behaviour ideal width is margin.left + margin.right + n * (24 * (60 / increment))
+  // e.g. for 5 minutes 40 + n * 288 = 616 px with n = 2
+  this.step = Math.floor(this.lenX / 24 / (60 / this.increment));
 
   this.se = new ScheduleEntry("00:00", 0.0, this);
 

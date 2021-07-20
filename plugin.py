@@ -437,6 +437,7 @@ class BasePlugin:
                     if (len(temps) == 3) :
                         try :
                             lFloat = list(map(float,temps))
+                            Domoticz.Log("List temp: {}".format(lFloat))
                             c = lFloat[0]
                             e = lFloat[1]
                             n = lFloat[2]

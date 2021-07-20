@@ -222,8 +222,8 @@ class BasePlugin:
             Domoticz.Error("The number of Heating Switches doesn't match the number of Zones")
 
         #delete if too many devices or wrong device type
-        for i in range(len(Devices) - 1, 0, -1) :
-            Devices[i].Delete()
+        # for i in range(len(Devices) - 1, 0, -1) :
+        #     Devices[i].Delete()
 
         for i in range(len(Devices) - 1, 0, -1) :
             if i > len(zoneNames) * 2 :
@@ -433,21 +433,22 @@ class BasePlugin:
                     c = self.Internals['ComfortTemp']
                     e = self.Internals['EcoTemp']
                     n = self.Internals['NightTemp']
-                    # description = thermostat.get_value("Description")
-                    description = thermostat.description
-                    Domoticz.Log("Thermostat description: {}".format(description))
+                    description = thermostat.get_value("Description")
+                    # description = thermostat.description
+                    # Domoticz.Log("Thermostat description: {}".format(description))
 
                     temps = description.split(";")
-                    Domoticz.Log("List temps: {}".format(temps))
+                    # Domoticz.Log("List temps: {}".format(temps))
                     if (len(temps) == 3) :
                         try :
                             lFloat = list(map(float,temps))
-                            Domoticz.Log("List lFllat: {}".format(lFloat))
+                            # Domoticz.Log("List lFllat: {}".format(lFloat))
                             c = lFloat[0]
                             e = lFloat[1]
                             n = lFloat[2]
                         except Exception as e:
-                            Domoticz.Log("Err convertir float: {}".format(e))
+                            # Domoticz.Log("Err convertir float: {}".format(e))
+                            pass
 
                     data = str(TimersToJson(timers, c, e, n)).replace("'", "\"")
                                                          

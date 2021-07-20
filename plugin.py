@@ -83,41 +83,6 @@ import magic
 #pip3 install accept-types
 from accept_types import get_best_match
 
-class Zone:
-
-    def __init__(self, name, thermostat, modeSelector, tempDetector, switch):
-        self.name = name
-        self.thermostat = thermostat
-        self.modeSelector = modeSelector
-        self.tempDetector = tempDetector
-        self.switch = switch
-
-    def __getTemp(self):
-        return float(self.tempDetector.get_value("Temp"))
-
-    def __getSwitchState(self):
-        return self.switch.get_value("Status")
-
-    def __getSetPoint(self):
-        return float(self.thermostat.get_value("SetPoint"))
-
-    def __setSwitchState(self, state):
-        DomoticzAPICall("type=command&param=switchlight&idx={}&switchcmd={}".format(self.switch.get_value("idx"),state))
-        # self.switch.set_value("Status", state)
-
-    def process(self):
-        temp = self.__getTemp()
-        state = self.__getSwitchState()
-        setPoint = self.__getSetPoint()
-        # Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
-        newState = "Off"
-        offset = 0.1
-        if ( state == "On" and temp < setPoint + offset ) or (state == "Off" and temp < setPoint - offset ) :
-            # Domoticz.Log("Zone {} must heat".format(self.name))
-            newState = "On"
-        if newState != state :
-            Domoticz.Log("Zone {} now {}".format(self.name, newState))
-            self.__setSwitchState(newState)
 
 class ZoneMode(Enum):
     OFF = 0
@@ -129,6 +94,52 @@ class HeatingMode(Enum):
     AUTO = 10
     COMFORT = 20
     HOLIDAY = 30
+
+_modeChauffage = HeatingMode.AUTO
+
+
+class Zone:
+
+    def __init__(self, name, thermostat, modeSelector, tempDetector, switch):
+        self.name = name
+        self.thermostat = thermostat
+        self.modeSelector = modeSelector
+        self.tempDetector = tempDetector
+        self.switch = switch
+
+    def __getModeZone(self):
+        return int(self.modeSelector.get_value("Level"))
+
+    def __getSetPoint(self):
+        return float(self.thermostat.get_value("SetPoint"))
+
+    def __getSwitchState(self):
+        return self.switch.get_value("Status")
+
+    def __getTemp(self):
+        return float(self.tempDetector.get_value("Temp"))
+
+    def __setSwitchState(self, state):
+        DomoticzAPICall("type=command&param=switchlight&idx={}&switchcmd={}".format(self.switch.get_value("idx"),state))
+        # self.switch.set_value("Status", state)
+
+    def process(self):
+        temp = self.__getTemp()
+        state = self.__getSwitchState()
+        setPoint = self.__getSetPoint()
+        modeZone = self.__getModeZone()
+        if _modeChauffage.get_value("Level") == HeatingMode.OFF or modeZone == ZoneMode.OFF :
+            setPoint = 7
+
+        # Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
+        newState = "Off"
+        offset = 0.1
+        if ( state == "On" and temp < setPoint + offset ) or (state == "Off" and temp < setPoint - offset ) :
+            # Domoticz.Log("Zone {} must heat".format(self.name))
+            newState = "On"
+        if newState != state :
+            Domoticz.Log("Zone {} now {}".format(self.name, newState))
+            self.__setSwitchState(newState)
 
 
 class BasePlugin:
@@ -144,7 +155,7 @@ class BasePlugin:
         self.debug = False
         self.loglevel = None
         self.statussupported = True
-        self.heartBeatCtr = 0
+        self.heartBeatCtr = -1
         self.zones = []
 
         self.InternalsDefaults = {
@@ -237,13 +248,13 @@ class BasePlugin:
         # for i in range(len(Devices), 1, -1) :
         #     Devices[i].Delete()
 
-        # for i in range(len(Devices) - 1, 0, -1) :
-        #     if i > len(zoneNames) * 2 :
-        #         Devices[i].Delete()
-        #     elif i % 2 == 1 and Devices[i].Type != 242 :
-        #         Devices[i].Delete()
-        #     elif i % 2 == 0 and Devices[i].Type != 244 :
-        #         Devices[i].Delete()
+        for i in range(len(Devices) , 1, -1) :
+            if i > len(zoneNames) * 2 + 1 :
+                Devices[i].Delete()
+            elif i % 2 == 0 and Devices[i].Type != 242 :
+                Devices[i].Delete()
+            elif i % 2 == 1 and Devices[i].Type != 244 :
+                Devices[i].Delete()
 
         optionsModeChauffage = {"LevelActions": "|||",\
                                 "LevelNames": "Off|Auto|Comfort|Holiday",\
@@ -253,6 +264,8 @@ class BasePlugin:
                             Options=optionsModeChauffage, Used=1).Create()
             Devices[1].Update(nValue=1, sValue="10", Name="Mode Chauffage")  # mode Auto by default
 
+        global _modeChauffage
+        _modeChauffage = dom.Device(self.__domServer, Devices[1].ID)
 
         optionsModeZone = {"LevelActions": "||",\
                            "LevelNames": "Off|Normal|Holiday",\
@@ -533,16 +546,13 @@ class BasePlugin:
             del self.httpServerConns[Connection.Name]
 
     def onHeartbeat(self):
-#        Domoticz.Log("onHeartbeat called")
-        if self.heartBeatCtr == 6 :
-            # Domoticz.Log("onHeartbeat do something")
+        if self.heartBeatCtr % 6 == 0 :
             # do what must be done
             for zone in self.zones :
                 zone.process()
             self.heartBeatCtr = 1
         else :
             self.heartBeatCtr += 1
-        # Domoticz.Log("Leaving onHeartbeat")
 
         
 #    def onDeviceModified(self, Unit):
@@ -601,6 +611,8 @@ class BasePlugin:
 
 global _plugin
 _plugin = BasePlugin()
+
+
 
 def onStart():
     global _plugin

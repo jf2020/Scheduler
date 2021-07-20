@@ -250,7 +250,7 @@ class BasePlugin:
             unitId = i*2
             if unitId not in Devices :
                 Domoticz.Device(Name="Mode" + name, Unit=unitId,  TypeName="Selector Switch", Switchtype=18, Image=15, Options=optionsModeZone, Used=1).Create()
-                Devices[unitId].Update(nValue=0, sValue="10", Name = "Mode " + name)  # mode normal by default
+                Devices[unitId].Update(nValue=1, sValue="10", Name = "Mode " + name)  # mode normal by default
             else :
                 dev = Devices[unitId]
                 dev.Update(nValue=dev.nValue, sValue=dev.sValue, Name = "Mode " + name)

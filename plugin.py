@@ -433,21 +433,14 @@ class BasePlugin:
                     c = self.Internals['ComfortTemp']
                     e = self.Internals['EcoTemp']
                     n = self.Internals['NightTemp']
-                    description = thermostat.get_value("Description")
-                    # description = thermostat.description
-                    # Domoticz.Log("Thermostat description: {}".format(description))
-
-                    temps = description.split(";")
-                    # Domoticz.Log("List temps: {}".format(temps))
+                    temps = thermostat.get_value("Description").split(";")
                     if (len(temps) == 3) :
                         try :
                             lFloat = list(map(float,temps))
-                            # Domoticz.Log("List lFllat: {}".format(lFloat))
                             c = lFloat[0]
                             e = lFloat[1]
                             n = lFloat[2]
                         except Exception as e:
-                            # Domoticz.Log("Err convertir float: {}".format(e))
                             pass
 
                     data = str(TimersToJson(timers, c, e, n)).replace("'", "\"")

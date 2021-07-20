@@ -128,7 +128,7 @@ class Zone:
         state = self.__getSwitchState()
         setPoint = self.__getSetPoint()
         modeZone = self.__getModeZone()
-        if _modeChauffage.get_value("Level") == HeatingMode.OFF or modeZone == ZoneMode.OFF :
+        if _modeChauffage.get_value("Level") == HeatingMode.OFF.value or modeZone == ZoneMode.OFF.value :
             setPoint = 7
 
         # Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))

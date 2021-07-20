@@ -534,6 +534,7 @@ class BasePlugin:
             if (abs(float(currentValue) - float(Level)) < 0.001):
                 return
             self.__thermostat[idxTh].set_value("setpoint", Level)
+        self.heartBeatCtr = 0
 
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):

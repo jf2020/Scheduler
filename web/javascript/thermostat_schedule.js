@@ -320,13 +320,13 @@ ScheduleSlider.prototype.handleClick = function (e) {
   else if (px < 32) {
     console.log(this.clipboard);
     if (this.clipboard.length > 0) {
-      this.entries = this.clipboard.map(a => new ScheduleEntry(a.hhm, a.temp, this))
+      this.entries = this.clipboard.map(a => new ScheduleEntry(a.hhmm, a.temp, this))
       console.log(this.entries);
       this.valid = false;
     }
   }
   else {
-    this.clipboard = this.entries.map(a => new ScheduleEntry(a.hhm, a.temp, null));
+    this.clipboard = this.entries.map(a => new ScheduleEntry(a.hhmm, a.temp, null));
     console.log(this.clipboard);
   }
 }

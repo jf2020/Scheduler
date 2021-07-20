@@ -493,7 +493,7 @@ class BasePlugin:
                     j = json.loads(jsn)
                     zoneId = j["zone"]
                     thermostat = self.__thermostat[zoneId]
-                    data = self.cheduleData(thermostat)
+                    data = self.scheduleData(thermostat)
 
                     Connection.Send({"Status":"200", 
                                 "Headers": {"Connection": "keep-alive", 

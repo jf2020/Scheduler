@@ -526,7 +526,7 @@ class BasePlugin:
         variables = DomoticzAPICall("type=command&param=getuservariables")
         if variables:
             # there is a valid response from the API but we do not know if our variable exists yet
-            novar = Truefapica
+            novar = True
             varname = Parameters["Name"] + "-InternalVariables"
             valuestring = ""
             if "result" in variables:

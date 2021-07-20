@@ -118,11 +118,6 @@ class Zone:
             Domoticz.Log("Zone {} now {}".format(self.name, newState))
             self.__setSwitchState(newState)
 
-class ZoneForJson:
-    def __init__ (self, name, idx) :
-        self.Name = name
-        self.idx = idx
-
 
 class BasePlugin:
     enabled = False
@@ -519,7 +514,7 @@ class BasePlugin:
         variables = DomoticzAPICall("type=command&param=getuservariables")
         if variables:
             # there is a valid response from the API but we do not know if our variable exists yet
-            novar = True
+            novar = Truefapica
             varname = Parameters["Name"] + "-InternalVariables"
             valuestring = ""
             if "result" in variables:

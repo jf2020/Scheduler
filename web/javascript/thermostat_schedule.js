@@ -304,11 +304,11 @@ ScheduleSlider.prototype.getColor = function (temp) {
 
 ScheduleSlider.prototype.handleClick = function (e) {
   var mouse = this.getMouse(e);
-  if (mouse.x < 20) alert ("<20")
+  if (mouse.x < 15  && mouse.x > 5) alert ("move up")
 }
 
 ScheduleSlider.prototype.handleDoubleClick = function (e) {
-  
+  var mouse = this.getMouse(e);
   var newEntry = new ScheduleEntry(this.se.hhmmFromX(mouse.x - this.margin.left + this.imgw / 2), 'C', this);
   this.setSelected(newEntry);
   this.addScheduleEntry(this.selection);

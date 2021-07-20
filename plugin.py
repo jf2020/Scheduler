@@ -633,7 +633,7 @@ def JsonToTimers(device, data, plugin):
         if day == "zone":
             continue
         if day == "temps":
-            device.set_value("description", str(plan[day]))
+            device.value("description", "toto")  #str(plan[day]))
             plugin.Internals['ComfortTemp'] = plan[day]["C"]
             plugin.Internals['EcoTemp'] = plan[day]["E"]
             plugin.Internals['NightTemp'] = plan[day]["N"]

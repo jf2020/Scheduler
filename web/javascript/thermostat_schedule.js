@@ -121,6 +121,7 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
   this.iconComfort = document.getElementById('icon-comfort');
   this.iconEco = document.getElementById('icon-eco');
   this.iconNight = document.getElementById('icon-night');
+  this.iconActions = document.getElementById('icon-actions')
 
   this.minX = this.margin.left - this.imgw / 2;
   this.maxX = this.width - this.margin.right - this.imgw / 2 - 1;
@@ -435,6 +436,7 @@ ScheduleSlider.prototype.drawDecorators = function (ctx) {
 
     xPos += xInc;
   }
+  ctx.drawImage(this.ss.iconActions, this.width - 49, this.height -17, 48, 16);
 }
 
 // set the selected entry

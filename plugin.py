@@ -226,6 +226,7 @@ class BasePlugin:
         comfortIco = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/comfort.png'), True)
         ecoIco = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/eco.png'), True)
         nightIco = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/night.png'), True)
+        iconActions = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/iconActions.png'), True)
         logo = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/images/logo.png'), True)
 
         #json = Utils.readFile(os.path.join(Parameters['HomeFolder'], 'web/thermostat_schedule.json'), False)
@@ -235,6 +236,7 @@ class BasePlugin:
         html = html.replace('"../images/comfort.png"', '"data:image/png;base64, ' + base64.b64encode(comfortIco).decode("ascii") + '"')
         html = html.replace('"../images/eco.png"', '"data:image/png;base64, ' + base64.b64encode(ecoIco).decode("ascii") + '"')
         html = html.replace('"../images/night.png"', '"data:image/png;base64, ' + base64.b64encode(nightIco).decode("ascii") + '"')
+        html = html.replace('"../images/iconActions.png"', '"data:image/png;base64, ' + base64.b64encode(iconActions).decode("ascii") + '"')
         html = html.replace('"../images/logo.png"', '"data:image/png;base64, ' + base64.b64encode(logo).decode("ascii") + '"')
         
 

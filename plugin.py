@@ -97,6 +97,9 @@ class HeatingMode(Enum):
 
 _modeChauffage = HeatingMode.AUTO
 
+global _plugin
+
+
 
 class Zone:
 
@@ -130,6 +133,14 @@ class Zone:
         modeZone = self.__getModeZone()
         if _modeChauffage.get_value("Level") == HeatingMode.OFF.value or modeZone == ZoneMode.OFF.value :
             setPoint = 7
+        if  _modeChauffage.get_value("Level") == HeatingMode.COMFORT.value or \
+            _modeChauffage.get_value("Level") == HeatingMode.HOLIDAY.value or \
+            modeZone == ZoneMode.HOLIDAY.value :
+            schedule = _plugin.scheduleData(self.thermostat)
+            if _modeChauffage.get_value("Level") == HeatingMode.COMFORT.value :
+                setPoint = schedule["temps"]["C"]
+            else :
+                pass
 
         # Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
         newState = "Off"
@@ -330,6 +341,25 @@ class BasePlugin:
 
         self.httpServerConns[Connection.Name] = Connection
 
+
+    def scheduleData(self, thermostat):
+        timers = dom.SetPointTimer.loadbythermostat(thermostat)
+        c = self.Internals['ComfortTemp']
+        e = self.Internals['EcoTemp']
+        n = self.Internals['NightTemp']
+        temps = thermostat.get_value("Description").split(";")
+        if (len(temps) == 3):
+            try:
+                lFloat = list(map(float, temps))
+                c = lFloat[0]
+                e = lFloat[1]
+                n = lFloat[2]
+            except Exception as e:
+                pass
+
+        return str(TimersToJson(timers, c, e, n)).replace("'", "\"")
+
+
     def onMessage(self, Connection, Data):
         Domoticz.Log("onMessage called for connection: "+Connection.Address+":"+Connection.Port+":"+Connection.Name)
         DumpHTTPResponseToLog(Data)
@@ -463,22 +493,8 @@ class BasePlugin:
                     j = json.loads(jsn)
                     zoneId = j["zone"]
                     thermostat = self.__thermostat[zoneId]
-                    timers = dom.SetPointTimer.loadbythermostat(thermostat)
-                    c = self.Internals['ComfortTemp']
-                    e = self.Internals['EcoTemp']
-                    n = self.Internals['NightTemp']
-                    temps = thermostat.get_value("Description").split(";")
-                    if (len(temps) == 3) :
-                        try :
-                            lFloat = list(map(float,temps))
-                            c = lFloat[0]
-                            e = lFloat[1]
-                            n = lFloat[2]
-                        except Exception as e:
-                            pass
+                    data = self.cheduleData(thermostat)
 
-                    data = str(TimersToJson(timers, c, e, n)).replace("'", "\"")
-                                                         
                     Connection.Send({"Status":"200", 
                                 "Headers": {"Connection": "keep-alive", 
                                             "Accept-Encoding": "gzip, deflate",
@@ -610,9 +626,7 @@ class BasePlugin:
        
       
 
-global _plugin
 _plugin = BasePlugin()
-
 
 
 def onStart():

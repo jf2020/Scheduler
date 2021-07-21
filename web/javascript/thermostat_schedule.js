@@ -10,9 +10,10 @@ function ScheduleEntry(hhmm, temp, ss) {
   this.ss = ss;
   this.hhmm = hhmm;
   this.temp = temp;
-  this.y = this.ss.imgY;
-
-  this.x = this.xFromHHMM(hhmm);
+  if (ss) {
+    this.y = this.ss.imgY;
+    this.x = this.xFromHHMM(hhmm);
+  }
 }
 
 
@@ -121,6 +122,7 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
   this.iconComfort = document.getElementById('icon-comfort');
   this.iconEco = document.getElementById('icon-eco');
   this.iconNight = document.getElementById('icon-night');
+  this.iconActions = document.getElementById('icon-actions')
 
   this.minX = this.margin.left - this.imgw / 2;
   this.maxX = this.width - this.margin.right - this.imgw / 2 - 1;
@@ -206,13 +208,13 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
         if (i == 0) {
           mySel.minX = thisSS.minX;
         }
-        else{
+        else {
           mySel.minX = entries[i - 1].x;
         }
         if (i == entries.length - 1) {
           mySel.maxX = thisSS.maxX + 2;
         }
-        else{
+        else {
           mySel.maxX = entries[i + 1].x;
         }
         thisSS.setSelected(mySel);
@@ -304,7 +306,25 @@ ScheduleSlider.prototype.getColor = function (temp) {
 
 ScheduleSlider.prototype.handleClick = function (e) {
   var mouse = this.getMouse(e);
-  if (mouse.x < 15  && mouse.x > 5) alert ("move up")
+  if (mouse.y > 15) return;
+  var px = this.width - mouse.x
+  if (px < 1 || px > 48) return;
+  if (px < 16) {
+    if (this.entries.length > 0 && confirm("Delete all entries for " + this.day + "?")) {
+      // Clear
+      this.entries.length = 0;
+      this.valid = false;
+    }
+  }
+  else if (px < 32) {
+    if (window.clipboard.length > 0) {
+      this.entries = window.clipboard.map(a => new ScheduleEntry(a.hhmm, a.temp, this))
+      this.valid = false;
+    }
+  }
+  else {
+    window.clipboard = this.entries.map(a => new ScheduleEntry(a.hhmm, a.temp, null));
+  }
 }
 
 ScheduleSlider.prototype.handleDoubleClick = function (e) {
@@ -315,7 +335,7 @@ ScheduleSlider.prototype.handleDoubleClick = function (e) {
   if (this.entries.length == 1) {
     // Add a second entry
     var x = this.se.xFromHHMM('22:00');
-    if (x > newEntry.x){
+    if (x > newEntry.x) {
       this.addScheduleEntry(new ScheduleEntry(this.se.hhmmFromX(x), 'N', this));
     }
   }
@@ -435,6 +455,7 @@ ScheduleSlider.prototype.drawDecorators = function (ctx) {
 
     xPos += xInc;
   }
+  ctx.drawImage(this.iconActions, this.width - 49, 1, 48, 16);
 }
 
 // set the selected entry

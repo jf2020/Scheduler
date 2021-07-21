@@ -137,7 +137,7 @@ class Zone:
         modeChauffage = _modeChauffage.get_value("Level")
 
         if modeChauffage == HeatingMode.OFF.value or modeZone == ZoneMode.OFF.value :
-            setPoint = 7
+            setPoint = 4
 
         if modeChauffage == HeatingMode.COMFORT.value or \
            modeChauffage == HeatingMode.HOLIDAY.value or \

@@ -42,6 +42,7 @@
 			}
 
 			pendingChanges = function() {
+				console.log(scheduleSliders.length);
 				return scheduleSliders.some(ss => ss.dirty);
 			}
 

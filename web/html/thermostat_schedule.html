@@ -289,8 +289,8 @@
 		});
 	</script>
 	<style>
-		html,
-		body {
+		.scheduler {
+			background-color: white;
 			margin: 0;
 			height: 100%;
 			width: 100%;
@@ -304,11 +304,6 @@
 			font-size: 16px;
 			font-weight: bold;
 		}
-
-		span {
-			color: black;
-		}
-
 
 		.pointer {
 			display: none;
@@ -383,7 +378,7 @@
 </head>
 
 <body>
-	<div align="center" style="background-color: white;">
+	<div class="scheduler">
 		<img id="pointer" class="pointer" src="../images/downArrow_white.png">
 		<img id="pointer-selected" class="pointer" src="../images/downArrow_red.png">
 		<img id="icon-comfort" class="pointer" src="../images/comfort.png">

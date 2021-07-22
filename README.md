@@ -42,7 +42,7 @@ It is possible to change timerplan and avoid reconfigurating in case of long vac
 
 1. Go to plugin folder and pull new version
 ```
-cd domoticz/plugins/zigbee2mqtt
+cd domoticz/plugins/Scheduler
 git pull
 ```
 2. Restart domoticz

@@ -1,15 +1,14 @@
 # Scheduler - Domoticz Python Plugin
 Multi zones heating thermostat weekly scheduler python plugin for Domoticz home automation system
 
-A fork and an extension of 
+A fork and an extension of https://github.com/ArtBern/Scheduler
+Inspired by https://github.com/chaeron/thermostat
 
 ## Prerequisites
 
-- Make sure that your Domoticz supports Python plugins (https://www.domoticz.com/wiki/Using_Python_plugins)
+Make sure that your Domoticz supports Python plugins (https://www.domoticz.com/wiki/Using_Python_plugins)
 
 ## Installation
-
-You can use [Plugins Manager](https://github.com/stas-demydiuk/domoticz-plugins-manager) for automatic installation or follow manual steps:
 
 1. Clone repository into your domoticz plugins folder
 ```
@@ -23,7 +22,7 @@ git clone https://github.com/jf2020/Scheduler.git
 
 Once configured teh plugin will create appropriate domoticz devices. You will find these devices on `Setup -> Devices` page
 
-Inspired by https://github.com/chaeron/thermostat
+
 
 Easy UI for timers manipulation. Setup OnTime timers and manage TimerPlans. 
 

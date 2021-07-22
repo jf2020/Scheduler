@@ -67,7 +67,7 @@
 							reloadSchedule(parseInt($('#zone-select').find(":selected").val()));
 						} else {
 							// reset
-							$(this).val($sel.data('currVal'));
+							$(this).val($(this).data('currVal'));
 						}
 
 					}).on('update', function () {

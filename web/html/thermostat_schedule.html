@@ -42,7 +42,8 @@
 			}
 
 			pendingChanges = function(){
-				return this.scheduleSliders.some(ss => ss.dirty);
+				var pending = this.scheduleSliders.some(ss => ss.dirty);
+				console.log("pending " + pending);
 			}
 
 			loadZones = function () {

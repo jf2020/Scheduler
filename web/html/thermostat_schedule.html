@@ -42,7 +42,6 @@
 			}
 
 			pendingChanges = function() {
-				console.log(scheduleSliders.length);
 				return scheduleSliders.some(ss => ss.dirty);
 			}
 
@@ -133,6 +132,7 @@
 			loadSchedule = function (data) {
 
 				$("#canvas").empty();
+				scheduleSliders.length = 0;
 
 				var comfortTemp = 19;
 				var ecoTemp = 17;

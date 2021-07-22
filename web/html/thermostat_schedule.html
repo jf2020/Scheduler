@@ -41,7 +41,7 @@
 				}
 			}
 
-			pendingChanges = function(){
+			pendingChanges = function() {
 				var pending = this.scheduleSliders.some(ss => ss.dirty);
 				console.log("pending " + pending);
 			}
@@ -62,7 +62,7 @@
 					$('#zone-select').val(data[0].idx);
 ``
 					$('#zone-select').on('change', function () {
-						if (!this.pendingChanges() || confirm('Are you sure you want to leave this schedule? You have unsaved changes.')) {
+						if (!pendingChanges() || confirm('Are you sure you want to leave this schedule? You have unsaved changes.')) {
 							// store new value        
 							$(this).trigger('update');
 							reloadSchedule(parseInt($('#zone-select').find(":selected").val()));

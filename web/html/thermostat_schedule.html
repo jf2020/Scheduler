@@ -41,6 +41,10 @@
 				}
 			}
 
+			pendingChanges = function(){
+				return this.scheduleSliders.some(ss => ss.dirty);
+			}
+
 			loadZones = function () {
 
 				$.getJSON("../zones.json", function (data) {
@@ -55,12 +59,20 @@
 						}));
 					}
 					$('#zone-select').val(data[0].idx);
-
+``
 					$('#zone-select').on('change', function () {
+						if (!this.pendingChanges() || confirm('Are you sure you want to leave this schedule? You have unsaved changes.')) {
+							// store new value        
+							$(this).trigger('update');
+							reloadSchedule(parseInt($('#zone-select').find(":selected").val()));
+						} else {
+							// reset
+							$(this).val($sel.data('currVal'));
+						}
 
-						//debugger;
-						reloadSchedule(parseInt($('#zone-select').find(":selected").val()));
-					});
+					}).on('update', function () {
+						$(this).data('currVal', $(this).val())
+					}).trigger('update');
 
 				});
 			};
@@ -85,7 +97,6 @@
 
 					$('#schedule-select').on('change', function () {
 
-						//debugger;
 						changeTimerPlan($('#schedule-select').find(":selected").val())
 
 						reloadSchedule(parseInt($('#zone-select').find(":selected").val()));
@@ -116,7 +127,6 @@
 						bootbox.alert($.t('Problem loading schedule.' + status + '. ' + error));
 					}
 				});
-
 			};
 
 			loadSchedule = function (data) {
@@ -427,7 +437,8 @@
 		<p align="center" style="width:500px;padding:10px;">
 			<input type="submit" class="btn btn-danger" value="Cancel" onclick="window.location = '/';" />
 			<input type="submit" class="btn btn-primary" value="Save Schedule" onclick="saveSchedule();" />
-			<input type="submit" class="btn btn-link" value="Reload" onclick="reloadSchedule($('#zone-select').find(':selected').val());" />
+			<input type="submit" class="btn btn-link" value="Reload"
+				onclick="reloadSchedule($('#zone-select').find(':selected').val());" />
 		</p>
 
 

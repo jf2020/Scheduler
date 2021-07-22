@@ -42,8 +42,7 @@
 			}
 
 			pendingChanges = function() {
-				var pending = scheduleSliders.some(ss => ss.dirty);
-				console.log("pending " + pending);
+				return scheduleSliders.some(ss => ss.dirty);
 			}
 
 			loadZones = function () {

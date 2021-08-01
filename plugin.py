@@ -72,19 +72,6 @@ import datetime as d
 # sudo pip3 install git+git://github.com/ArtBern/Domoticz-API.git -t /usr/lib/python3.5 --upgrade
 import DomoticzAPI as dom
 
-#try:
-    #apt-get install libmagic-dev
-    #pip3 install python-libmagic
-import magic
-#except OSError as e:
-#    Domoticz.Log ("Error loading python-libmagic: {0}:{1}".format(e.__class__.__name__, e.message))
-#except AttributeError as e:
-#    Domoticz.Log ("Error loading python-libmagic: {0}:{1}".format(e.__class__.__name__, e.message)) 
-
-
-#pip3 install accept-types
-from accept_types import get_best_match
-
 weekDays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
 class ZoneMode(Enum):
@@ -375,22 +362,12 @@ class BasePlugin:
         # Incoming Requests
         if "Verb" in Data:
             strVerb = Data["Verb"]
-            #strData = Data["Data"].decode("utf-8", "ignore")
             LogMessage(strVerb+" request received.")
             data = "<!doctype html><html><head></head><body><h1>Successful GET!!!</h1><body></html>"
             if (strVerb == "GET"):
 
                 strURL = Data["URL"]
                 path = urllib.parse.unquote_plus(urllib.parse.urlparse(strURL).path)
-                filePath = os.path.join(Parameters['HomeFolder'], "web" + path)
-
-                with magic.Magic() as m:
-                    mimetype = m.from_file(filePath)
-                
-                LogMessage("Mime type determined as " + mimetype)
-                LogMessage("Path is " + path)
-
-                return_type = mimetype
 
                 if path == '/timer_plans.json':
 
@@ -438,35 +415,7 @@ class BasePlugin:
                                                 "Expires": "0"},
                                     "Data": zones})     
 
-                elif (return_type == 'text/html' or return_type == 'text/css' or return_type == 'text/plain'):
-                    data = Utils.readFile(filePath, False)
-     
-                    Connection.Send({"Status":"200", 
-                                    "Headers": {"Connection": "keep-alive", 
-                                                "Accept-Encoding": "gzip, deflate",
-                                                "Access-Control-Allow-Origin":"http://" + Parameters['Address'] + ":" + Parameters['Port'] + "",
-                                                "Cache-Control": "no-cache, no-store, must-revalidate",
-                                                "Content-Type": return_type + "; charset=UTF-8",
-                                                "Content-Length":""+str(len(data))+"",
-                                                "Pragma": "no-cache",
-                                                "Expires": "0"},
-                                    "Data": data})
-
-                elif return_type == 'image/png' or return_type == 'image/x-icon':
-                    data = Utils.readFile(filePath, True)
-
-                    LogMessage("Length is " + str(len(data)))
-     
-                    Connection.Send({"Status":"200", 
-                                    "Headers": {"Connection": "keep-alive", 
-                                                "Accept-Encoding": "gzip, deflate",
-                                                "Access-Control-Allow-Origin":"http://" + Parameters['Address'] + ":" + Parameters['Port'] + "",
-                                                "Cache-Control": "no-cache, no-store, must-revalidate",
-                                                "Content-Type": return_type,
-                                                "Pragma": "no-cache",
-                                                "Expires": "0"},
-                                    "Data": data})
-                elif return_type == None:
+                else:
                    Connection.Send({"Status":"406"}) 
                                 
             elif (strVerb == "POST"):

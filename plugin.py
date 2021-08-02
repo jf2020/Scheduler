@@ -416,7 +416,7 @@ class BasePlugin:
                                     "Data": zones})     
 
                 else:
-                   Connection.Send({"Status":"406"}) 
+                    Connection.Send({"Status":"406"}) 
                                 
             elif (strVerb == "POST"):
 

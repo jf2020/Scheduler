@@ -165,6 +165,7 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
 
   // **** Keep track of state! ****
 
+  this.dirty = false;     // true when modifications have been made
   this.valid = false; 		// when set to false, the canvas will redraw everything
   this.entries = [];  		// the collection of things to be drawn
   this.dragging = false; 	// Keep track of when we are dragging
@@ -254,6 +255,7 @@ function ScheduleSlider(day, canvas, imgref, selref, otherSS) {
       var nx = mouse.x - thisSS.dragoffx;
       //nx = nx - nx % thisSS.step;
       thisSS.selection.setX(nx);
+      thisSS.dirty = true;
 
       if (thisSS.selection.x < thisSS.selection.minX) {
         thisSS.selection.setX(thisSS.selection.minX);
@@ -309,17 +311,18 @@ ScheduleSlider.prototype.handleClick = function (e) {
   if (mouse.y > 15) return;
   var px = this.width - mouse.x
   if (px < 1 || px > 48) return;
-  if (px < 16) {
+  if (px < 16) {  // Clear
     if (this.entries.length > 0 && confirm("Delete all entries for " + this.day + "?")) {
-      // Clear
       this.entries.length = 0;
       this.valid = false;
+      this.dirty = true;
     }
   }
-  else if (px < 32) {
+  else if (px < 32) {  // paste
     if (window.clipboard.length > 0) {
       this.entries = window.clipboard.map(a => new ScheduleEntry(a.hhmm, a.temp, this))
       this.valid = false;
+      this.dirty = true;
     }
   }
   else {
@@ -332,6 +335,7 @@ ScheduleSlider.prototype.handleDoubleClick = function (e) {
   var newEntry = new ScheduleEntry(this.se.hhmmFromX(mouse.x - this.margin.left + this.imgw / 2), 'C', this);
   this.setSelected(newEntry);
   this.addScheduleEntry(this.selection);
+  this.dirty = true;
   if (this.entries.length == 1) {
     // Add a second entry
     var x = this.se.xFromHHMM('22:00');

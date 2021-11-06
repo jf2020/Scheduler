@@ -129,24 +129,28 @@ class Zone:
         DomoticzAPICall("type=command&param=switchlight&idx={}&switchcmd={}".format(self.switch.get_value("idx"),state))
         # self.switch.set_value("Status", state)
 
-    def process(self):
+    def process(self, day):
         temp = self.__getTemp()
         state = self.__getSwitchState()
-        setPoint = self.__getSetPoint()
+        setPoint = self.__getSetPoint()  # temperature de consigne given by the thermostat
         modeZone = self.__getModeZone()
         modeChauffage = _modeChauffage.get_value("Level")
 
         if modeChauffage == HeatingMode.OFF.value or modeZone == ZoneMode.OFF.value :
+            # no-freeze temperature
             setPoint = 4
-
-        if modeChauffage == HeatingMode.COMFORT.value or \
-           modeChauffage == HeatingMode.HOLIDAY.value or \
-           modeZone == ZoneMode.HOLIDAY.value :
+        else :
             schedule = json.loads(_plugin.scheduleData(self.thermostat))
+
             if modeChauffage == HeatingMode.COMFORT.value :
+                # use Comfort temperature defined by schedule independently of the time
                 setPoint = schedule["temps"]["C"]
-            else : # HOLIDAY => chauffe comme dimanche
+            elif modeChauffage == HeatingMode.HOLIDAY.value or \
+                 modeZone == ZoneMode.HOLIDAY.value: # HOLIDAY => chauffe comme dimanche
+                    # récupère température de consigne du dimanche pour l'heure actuelle
                 setPoint = newSetPoint(schedule["temps"]["N"],schedule[weekDays[0]])
+            else : # HeatingMode.AUTO and ZoneMode.Normal
+                setPoint = newSetPoint(schedule["temps"]["N"],schedule[weekDays[day]])
 
         # Domoticz.Log("Zone {}, Temp: {}, SetPoint: {}, State: {}".format(self.name,temp,setPoint,state))
         newState = "Off"
@@ -578,8 +582,9 @@ class BasePlugin:
     def onHeartbeat(self):
         if self.heartBeatCtr % 6 == 0 :
             # do what must be done
+            day = int(d.datetime.today().strftime('%w'))
             for zone in self.zones :
-                zone.process()
+                zone.process(day)
             self.heartBeatCtr = 1
         else :
             self.heartBeatCtr += 1

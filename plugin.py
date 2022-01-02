@@ -338,7 +338,7 @@ class BasePlugin:
                                                                                     zone.thermostat.get_value("SetPoint"),\
                                                                                     zone.tempDetector.get_value("idx"),\
                                                                                     zone.switch.get_value("idx"),\
-                                                                                    inv))
+                                                                                    zone.invState))
 
         
         self.__filename = Parameters['StartupFolder'] + 'www/templates/Scheduler-' + "".join(x for x in Parameters['Name'] if x.isalnum()) + '.html'

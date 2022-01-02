@@ -247,7 +247,7 @@ class BasePlugin:
         idxTemps = Parameters["Mode3"].split(",")
         idxSwitches = Parameters["Mode4"].split(",")
 
-        if len(zoneNames) == 0 :x
+        if len(zoneNames) == 0 :
             Domoticz.Error("At least one zone must be defined!")
         if len(zoneNames) != len(idxTemps) :
             Domoticz.Error("The number of Inside Temperature Sensors doesn't match the number of Zones")

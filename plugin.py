@@ -245,9 +245,9 @@ class BasePlugin:
 
         zoneNames = Parameters["Mode2"].split(",")
         idxTemps = Parameters["Mode3"].split(",")
-        Domoticz.Log("idxTemps : " + str(idxTemps))
+#        Domoticz.Log("idxTemps : " + str(idxTemps))
         idxSwitches = Parameters["Mode4"].split(",")
-        Domoticz.Log("idxSwitches : " + str(idxSwitches))
+#        Domoticz.Log("idxSwitches : " + str(idxSwitches))
 
         if len(zoneNames) == 0 :x
             Domoticz.Error("At least one zone must be defined!")

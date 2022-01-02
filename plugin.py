@@ -245,9 +245,7 @@ class BasePlugin:
 
         zoneNames = Parameters["Mode2"].split(",")
         idxTemps = Parameters["Mode3"].split(",")
-#        Domoticz.Log("idxTemps : " + str(idxTemps))
         idxSwitches = Parameters["Mode4"].split(",")
-#        Domoticz.Log("idxSwitches : " + str(idxSwitches))
 
         if len(zoneNames) == 0 :x
             Domoticz.Error("At least one zone must be defined!")
@@ -305,7 +303,7 @@ class BasePlugin:
             modeSelector = dom.Device(self.__domServer, Devices[unitIdMode].ID)
             self.__thermostat.append(thermostat)
 
-            Domoticz.Log("searching devices with idx {} and {}".format(idxTemps[i-1], idxSwitches[i-1]))
+            Domoticz.Log("searching devices with idx {} and {}".format(idxTemps[i - 1], idxSwitches[i - 1]))
 
             self.zones.append(Zone(name,\
                                    thermostat, \

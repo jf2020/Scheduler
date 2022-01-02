@@ -93,12 +93,13 @@ global _plugin
 
 class Zone:
 
-    def __init__(self, name, thermostat, modeSelector, tempDetector, switch):
+    def __init__(self, name, thermostat, modeSelector, tempDetector, switch, inv):
         self.name = name
         self.thermostat = thermostat
         self.modeSelector = modeSelector
         self.tempDetector = tempDetector
         self.switch = switch
+        self.invState = inv
 
     def __getModeZone(self):
         return int(self.modeSelector.get_value("Level"))
@@ -107,13 +108,23 @@ class Zone:
         return float(self.thermostat.get_value("SetPoint"))
 
     def __getSwitchState(self):
-        return self.switch.get_value("Status")
+        state =  self.switch.get_value("Status")
+        res = state
+        if self.invState :
+            res = 'Off' if state == 'On' else 'On'
+        return res
 
     def __getTemp(self):
         return float(self.tempDetector.get_value("Temp"))
 
     def __setSwitchState(self, state):
-        DomoticzAPICall("type=command&param=switchlight&idx={}&switchcmd={}".format(self.switch.get_value("idx"),state))
+        newState = state
+        switchIdx = self.switch.get_value("idx")
+
+        if self.invState :
+            newState = 'Off' if state == 'On' else 'On'
+
+        DomoticzAPICall("type=command&param=switchlight&idx={}&switchcmd={}".format(switchIdx, newState))
         # self.switch.set_value("Status", state)
 
     def process(self, day):
@@ -303,19 +314,31 @@ class BasePlugin:
             modeSelector = dom.Device(self.__domServer, Devices[unitIdMode].ID)
             self.__thermostat.append(thermostat)
 
-            Domoticz.Log("searching devices with idx {} and {}".format(idxTemps[i - 1], idxSwitches[i - 1]))
+#            Domoticz.Log("searching devices with idx {} and {}".format(idxTemps[i - 1], idxSwitches[i - 1]))
+
+            # test if inversed switch (-134 means switch of idx 134 is inverted)
+            idxSwitch = idxSwitches[i-1]
+            inv = False
+            if idxSwitch[0] == '-':
+                if len(idxSwitch) == 1 :
+                    Domoticz.Error("incomplete idx : -000 expected got -")
+                else:
+                    inv=True
+                    idxSwitch = idxSwitches[i-1][1:]
 
             self.zones.append(Zone(name,\
                                    thermostat, \
                                    modeSelector, \
                                    dom.Device(self.__domServer, idxTemps[i-1]),\
-                                   dom.Device(self.__domServer, idxSwitches[i-1])))
+                                   dom.Device(self.__domServer, idxSwitch),
+                                   inv))
 
         for zone in self.zones :
-            Domoticz.Log("Zone : {}, setPoint : {}, idxTemp : {}, idxSwitch : {}".format(zone.name,\
-                                                                                         zone.thermostat.get_value("SetPoint"),\
-                                                                                         zone.tempDetector.get_value("idx"),\
-                                                                                         zone.switch.get_value("idx")))
+            Domoticz.Log("Zone: {}, setPoint: {}, idxTemp: {}, idxSwitch: {}, inv: {}".format(zone.name,\
+                                                                                    zone.thermostat.get_value("SetPoint"),\
+                                                                                    zone.tempDetector.get_value("idx"),\
+                                                                                    zone.switch.get_value("idx"),\
+                                                                                    inv))
 
         
         self.__filename = Parameters['StartupFolder'] + 'www/templates/Scheduler-' + "".join(x for x in Parameters['Name'] if x.isalnum()) + '.html'
